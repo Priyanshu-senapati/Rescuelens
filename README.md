@@ -23,7 +23,7 @@ decide what is safe to conclude: **identified**, **ambiguous** (e.g. hybrid can'
 | `data/` | class names, high-voltage class list |
 | `docs/` | API contract, fixtures, design doc |
 
-API: [docs/api-contract.md](docs/api-contract.md)
+Design document + architecture diagram: [docs/design.md](docs/design.md) · API: [docs/api-contract.md](docs/api-contract.md) · Evaluation: `eval_P5_T50.md`
 
 ## Run it
 
