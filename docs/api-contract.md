@@ -75,7 +75,7 @@ The evaluation numbers for the dashboard (same numbers as `eval_P5_<TeamID>.md`)
   "efficiency": {"fp32_mb": 0.0, "int8_mb": 0.0, "fp32_ms": 0.0, "int8_ms": 0.0, "int8_top1": 0.0},
   "robustness": [{"condition": "dark", "severity": 1, "top1": 0.0}],
   "calibration": {"ece_before": 0.0, "ece_after": 0.0, "temperature": 1.0},
-  "safety": {"hv_miss_rate": 0.0, "hv_false_alarm_rate": 0.0, "unknown_catch_rate": 0.0},
+  "safety": {"hv_miss_rate": 0.0, "hv_false_alarm_rate": 0.0, "unknown_catch_rate": 0.0, "by_threshold": [{"threshold": 0.05, "hv_miss_rate": 0.0, "hv_false_alarm_rate": 0.0}]},
   "approaches": [{"name": "classical", "top1": 0.0, "top5": 0.0}, {"name": "deep", "top1": 0.0, "top5": 0.0}, {"name": "hybrid", "top1": 0.0, "top5": 0.0}],
   "ablation": [{"variant": "full system", "top1": 0.0}],
   "risk_coverage": [{"coverage": 1.0, "accuracy": 0.0}]

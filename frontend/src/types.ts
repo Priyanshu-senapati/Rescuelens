@@ -85,6 +85,7 @@ export interface Metrics {
     argmax_hv_miss_rate?: number | null;
     known_flagged_unknown_rate?: number | null;
     unknown_catch_rate: number | null;
+    by_threshold?: { threshold: number; hv_miss_rate: number; hv_false_alarm_rate: number }[];
   };
   approaches?: { name: string; top1: number | null; top5: number | null }[];
   localisation?: { deep_mean_iou: number; classical_mean_iou: number | null };

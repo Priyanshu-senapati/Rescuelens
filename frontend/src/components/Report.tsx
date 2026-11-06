@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchMetrics } from "../api";
 import type { Metrics } from "../types";
+import SafetyEvidence from "./SafetyEvidence";
 import { Bar, SectionTitle, pct } from "./bits";
 
 const CONDITION_NAME: Record<string, string> = {
@@ -27,9 +28,12 @@ export default function Report() {
   if (m === undefined) return <p className="py-10 text-ink-soft">Loading the evaluation report…</p>;
   if (m === null)
     return (
-      <div className="py-10">
-        <SectionTitle title="Model report" />
-        <p className="text-ink-soft">The evaluation report isn't on this server yet. It appears once the trained models are deployed.</p>
+      <div className="space-y-10 py-10">
+        <div>
+          <SectionTitle title="Model report" />
+          <p className="text-ink-soft">The full evaluation report isn't on this server yet. It appears once the trained models are deployed. These safety results are from the same evaluation.</p>
+        </div>
+        <SafetyEvidence metrics={null} />
       </div>
     );
 
@@ -87,6 +91,8 @@ export default function Report() {
           )}
         </div>
       )}
+
+      <SafetyEvidence metrics={m} />
 
       {m.robustness && (
         <div>
