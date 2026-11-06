@@ -29,3 +29,4 @@ runs/
 training/.quick/
 training/*.log
 training/*.err
+*.log
