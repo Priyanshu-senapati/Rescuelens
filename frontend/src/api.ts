@@ -25,30 +25,47 @@ export async function analyze(photo: Blob, name: string, signal?: AbortSignal): 
   if (MOCK) return mockResult(name);
   const body = new FormData();
   body.append("file", photo, name);
-  const timeout = AbortSignal.timeout(TIMEOUT_MS);
-  let res: Response;
+  // one controller + timer instead of AbortSignal.any/timeout, which older iPhones (iOS < 17.4) lack
+  const ctrl = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    ctrl.abort();
+  }, TIMEOUT_MS);
+  const forward = () => ctrl.abort();
+  signal?.addEventListener("abort", forward);
+  const stopped = () => {
+    if (signal?.aborted) return new DOMException("Aborted", "AbortError");
+    if (timedOut) return new ApiError("timeout", "The server took too long to answer. Try again in a moment.");
+    return null;
+  };
   try {
-    res = await fetch("/api/analyze", {
-      method: "POST",
-      body,
-      signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
-    });
-  } catch (err: unknown) {
-    if (err instanceof DOMException && err.name === "AbortError" && signal?.aborted) throw err;
-    if (err instanceof DOMException && (err.name === "TimeoutError" || timeout.aborted))
-      throw new ApiError("timeout", "The server took too long to answer. Try again in a moment.");
-    throw new ApiError("network", "Couldn't reach the server. Check your connection and try again.");
+    let res: Response;
+    try {
+      res = await fetch("/api/analyze", { method: "POST", body, signal: ctrl.signal });
+    } catch {
+      throw stopped() ?? new ApiError("network", "Couldn't reach the server. Check your connection and try again.");
+    }
+    const data: unknown = await res.json().catch(() => null);
+    const stop = stopped();
+    if (stop) throw stop;
+    if (!res.ok) {
+      const e = (data as { error?: { code?: string; message?: string } } | null)?.error;
+      throw new ApiError(e?.code ?? "internal", e?.message ?? `The server returned an error (${res.status}).`);
+    }
+    if (data === null) throw new ApiError("internal", "The server sent an answer that couldn't be read. Try again.");
+    return data as Result;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", forward);
   }
-  const data: unknown = await res.json().catch(() => null);
-  if (!res.ok) {
-    const e = (data as { error?: { code?: string; message?: string } } | null)?.error;
-    throw new ApiError(e?.code ?? "internal", e?.message ?? `The server returned an error (${res.status}).`);
-  }
-  return data as Result;
 }
 
 export async function fetchMetrics(): Promise<Metrics | null> {
-  const res = await fetch("/api/metrics").catch(() => null);
-  if (!res || !res.ok) return null;
-  return (await res.json()) as Metrics;
+  try {
+    const res = await fetch("/api/metrics");
+    return res.ok ? ((await res.json()) as Metrics) : null;
+  } catch {
+    return null;
+  }
 }

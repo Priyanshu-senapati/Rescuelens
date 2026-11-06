@@ -1,4 +1,4 @@
-import { useRef, useState, type DragEvent } from "react";
+import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { MAX_BYTES } from "../image";
 
 interface Props {
@@ -32,6 +32,11 @@ export default function Uploader({ onPick }: Props) {
     const res = await fetch(`/samples/${file}`).catch(() => null);
     if (!res || !res.ok) return setError("Couldn't load that sample. Try uploading a photo instead.");
     onPick(await res.blob(), file);
+  }
+
+  function onInput(e: ChangeEvent<HTMLInputElement>) {
+    accept(e.target.files?.[0]);
+    e.target.value = ""; // so choosing the same photo again still triggers a change
   }
 
   function onDrop(e: DragEvent) {
@@ -77,8 +82,8 @@ export default function Uploader({ onPick }: Props) {
           </button>
         </div>
         <p className="mt-4 text-center text-ink-soft">or drop a photo here. JPEG, PNG or HEIC, up to 10 MB.</p>
-        <input ref={camera} type="file" accept="image/*" capture="environment" hidden onChange={(e) => accept(e.target.files?.[0])} />
-        <input ref={files} type="file" accept="image/*,.heic,.heif" hidden onChange={(e) => accept(e.target.files?.[0])} />
+        <input ref={camera} type="file" accept="image/*" capture="environment" hidden onChange={onInput} />
+        <input ref={files} type="file" accept="image/*,.heic,.heif" hidden onChange={onInput} />
         {error && (
           <p role="alert" className="mt-4 rounded-md border border-ink bg-paper px-3 py-2 font-medium">
             {error}

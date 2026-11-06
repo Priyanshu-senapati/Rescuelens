@@ -32,35 +32,44 @@ export default function StressTest({ photo, baseline }: { photo: Prepared; basel
   const [result, setResult] = useState<Result | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const inflight = useRef<AbortController | null>(null);
+  const previewRef = useRef<string | null>(null);
   const touched = Object.values(d).some((v) => v > 0);
+
+  function showPreview(url: string | null) {
+    if (previewRef.current) URL.revokeObjectURL(previewRef.current);
+    previewRef.current = url;
+    setPreview(url);
+  }
+
+  useEffect(() => () => showPreview(null), []); // free the last preview image on unmount
 
   useEffect(() => {
     if (!touched) {
-      setPreview(null);
+      showPreview(null);
       setResult(null);
+      setBusy(false);
       return;
     }
+    const ctrl = new AbortController(); // aborted when the sliders move again, on reset, or on unmount
     const timer = setTimeout(async () => {
-      inflight.current?.abort();
-      const ctrl = new AbortController();
-      inflight.current = ctrl;
       setBusy(true);
       setError(null);
       try {
         const img = await degradeImage(photo.url, d, baseline.detection?.box ?? null);
-        setPreview((old) => {
-          if (old) URL.revokeObjectURL(old);
-          return img.url;
-        });
-        setResult(await analyze(img.blob, img.name, ctrl.signal));
+        if (ctrl.signal.aborted) return URL.revokeObjectURL(img.url);
+        showPreview(img.url);
+        const r = await analyze(img.blob, img.name, ctrl.signal);
+        if (!ctrl.signal.aborted) setResult(r);
       } catch (err: unknown) {
         if (!ctrl.signal.aborted) setError(err instanceof ApiError ? err.message : "Couldn't run the stress test.");
       } finally {
         if (!ctrl.signal.aborted) setBusy(false);
       }
     }, 650);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      ctrl.abort();
+    };
   }, [d, touched, photo.url, baseline.detection]);
 
   return (

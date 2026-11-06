@@ -36,6 +36,7 @@ export default function App() {
   const [photo, setPhoto] = useState<Prepared | null>(null);
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const abort = useRef<AbortController | null>(null);
+  const pickId = useRef(0); // discards a slow photo decode that finishes after a newer pick or a reset
   const elapsed = useElapsed(phase.kind === "loading");
 
   async function run(p: Prepared) {
@@ -45,24 +46,32 @@ export default function App() {
     setPhase({ kind: "loading" });
     try {
       const result = await analyze(p.blob, p.name, ctrl.signal);
-      setPhase({ kind: "done", result });
+      if (!ctrl.signal.aborted) setPhase({ kind: "done", result });
     } catch (err: unknown) {
       if (ctrl.signal.aborted) return;
       setPhase({ kind: "error", message: err instanceof ApiError ? err.message : "Something went wrong. Try again." });
     }
   }
 
+  function swapPhoto(next: Prepared | null) {
+    setPhoto((old) => {
+      if (old) URL.revokeObjectURL(old.url);
+      return next;
+    });
+  }
+
   async function pick(file: Blob, name: string) {
+    const id = ++pickId.current;
     const p = await prepareImage(file, name);
-    if (photo) URL.revokeObjectURL(photo.url);
-    setPhoto(p);
+    if (id !== pickId.current) return URL.revokeObjectURL(p.url);
+    swapPhoto(p);
     void run(p);
   }
 
   function reset() {
+    pickId.current++;
     abort.current?.abort();
-    if (photo) URL.revokeObjectURL(photo.url);
-    setPhoto(null);
+    swapPhoto(null);
     setPhase({ kind: "idle" });
   }
 
