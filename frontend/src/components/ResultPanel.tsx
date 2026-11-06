@@ -1,11 +1,11 @@
 import type { Result, Safety, Status } from "../types";
 import { Bar, pct } from "./bits";
 
-const STATUS: Record<Status, { title: string; border: string; text: string; note: string }> = {
-  identified: { title: "Identified", border: "border-ok", text: "text-ok", note: "Confident about the exact model and year." },
-  ambiguous: { title: "Not certain", border: "border-warn", text: "text-warn", note: "Sure about part of the answer, not all of it." },
-  unknown: { title: "Not recognised", border: "border-unknown", text: "text-unknown", note: "Don't use this answer for rescue decisions." },
-  no_vehicle: { title: "No vehicle found", border: "border-ink", text: "text-ink", note: "Try a photo where the whole vehicle is visible." },
+const STATUS: Record<Status, { title: string; chip: string; note: string }> = {
+  identified: { title: "Identified", chip: "bg-ok", note: "Confident about the exact model and year." },
+  ambiguous: { title: "Not certain", chip: "bg-warn", note: "Sure about part of the answer, not all of it." },
+  unknown: { title: "Not recognised", chip: "bg-unknown", note: "Don't use this answer for rescue decisions." },
+  no_vehicle: { title: "No vehicle found", chip: "bg-ink", note: "Try a photo where the whole vehicle is visible." },
 };
 
 const LEVEL_NAME = { make: "Brand", family: "Model family", vehicle: "Exact model and year" } as const;
@@ -60,9 +60,9 @@ export default function ResultPanel({ result: r }: { result: Result }) {
         </p>
       )}
 
-      <div className={`rounded-lg border-l-8 bg-sheet p-5 shadow-sm ${st.border}`}>
-        <p className={`font-semibold ${st.text}`}>{st.title}</p>
-        <p className="mt-1 font-display text-4xl font-bold leading-[1.05]">{r.headline}</p>
+      <div className="rounded-lg border border-line bg-sheet p-5">
+        <p className={`inline-block rounded-sm px-2.5 py-1 font-semibold text-white ${st.chip}`}>{st.title}</p>
+        <p className="mt-2 font-display text-4xl font-bold leading-[1.05]">{r.headline}</p>
         <p className="mt-2 text-ink-soft">{st.note}</p>
         {r.status === "unknown" && r.prediction && (
           <p className="mt-3 text-ink-soft">
