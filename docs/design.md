@@ -127,8 +127,11 @@ high-voltage miss / false-alarm rates, classical vs deep vs hybrid, ablation, mo
    explained rather than hidden.
 5. **Same body, different powertrain**: Hyundai Sonata Sedan vs Sonata Hybrid 2012. The summed high-voltage
    probability cuts missed hybrids/EVs from 4.6% (top-1 label) to 0.9%.
-6. **Out-of-distribution cars** (post-2012 or non-US models): softmax alone would give a confident wrong label;
-   the embedding-distance check flags them as unknown (catch rate in the eval file).
+6. **Out-of-distribution cars**: on 60 freely licensed Wikimedia Commons photos of 30 models the network never saw
+   (Indian models such as Swift, Nexon, Creta, Thar, Innova; post-2012 EVs such as Tesla Model 3/Y, Ioniq 5, ID.4),
+   **88.3%** were answered "unknown" while only 5% of known test cars are wrongly flagged. The misses are look-alikes:
+   Mahindra Thar taken for Jeep Wrangler (the Thar is styled on it), Tesla Model Y for Tesla Model S - where the
+   high-voltage warning still fired - and MG Hector answered "not certain" rather than "unknown".
 
 ## 10. Deployment
 

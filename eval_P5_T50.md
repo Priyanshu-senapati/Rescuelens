@@ -82,7 +82,7 @@ High-voltage (hybrid/EV) warning threshold on summed calibrated probability:
 | 0.3 | 4.03% | 0.14% |
 | 0.5 | 5.48% | 0.08% |
 Plain top-1 (argmax) would miss 4.61% of hybrid/EV test cars (347 images).
-Unknown-car check: 5.00% of known test cars wrongly flagged unknown; n/a of 0 photos of cars outside the 196 classes (Indian / post-2012 models) correctly answered 'unknown'.
+Unknown-car check: 5.00% of known test cars wrongly flagged unknown; 88.33% of 60 photos of cars outside the 196 classes (Indian / post-2012 models) correctly answered 'unknown'.
 
 ## Approach comparison (classical vs deep learning vs hybrid)
 | Approach | What it is | Top-1 | Top-5 |
