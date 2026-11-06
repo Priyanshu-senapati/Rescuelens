@@ -37,6 +37,7 @@
     "deep": {"label": "BMW M3 Coupe 2012", "prob": 0.93},
     "hybrid": {"label": "BMW M3 Coupe 2012", "prob": 0.94, "status": "identified"}
   },
+  "brand_evidence": {"whole_car": [{"make": "BMW", "prob": 0.99}, {"make": "Audi", "prob": 0.004}, {"make": "Mercedes-Benz", "prob": 0.002}], "details": [{"make": "BMW", "prob": 0.96}, {"make": "Audi", "prob": 0.01}, {"make": "Volvo", "prob": 0.005}], "combined": [{"make": "BMW", "prob": 0.975}, {"make": "Audi", "prob": 0.007}, {"make": "Mercedes-Benz", "prob": 0.003}], "weight": 0.5, "conflict": false},
   "timing_ms": {"detect": 130, "classify": 400, "classical": 90, "total": 650},
   "disclaimer": "Decision-support prototype. Vehicle identification is probabilistic. Never rely on it alone for cutting, lifting or disabling a vehicle."
 }

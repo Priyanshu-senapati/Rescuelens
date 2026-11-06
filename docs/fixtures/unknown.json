@@ -41,6 +41,7 @@
     "deep": {"label": "Toyota Camry Sedan 2012", "prob": 0.88},
     "hybrid": {"label": "Toyota Camry Sedan 2012", "prob": 0.21, "status": "unknown"}
   },
+  "brand_evidence": {"whole_car": [{"make": "Toyota", "prob": 0.34}, {"make": "Hyundai", "prob": 0.2}, {"make": "Honda", "prob": 0.11}], "details": [{"make": "Hyundai", "prob": 0.41}, {"make": "Toyota", "prob": 0.18}, {"make": "Kia", "prob": 0.06}], "combined": [{"make": "Hyundai", "prob": 0.305}, {"make": "Toyota", "prob": 0.26}, {"make": "Honda", "prob": 0.07}], "weight": 0.5, "conflict": true},
   "timing_ms": {"detect": 150, "classify": 410, "classical": 100, "total": 700},
   "disclaimer": "Decision-support prototype. Vehicle identification is probabilistic. Never rely on it alone for cutting, lifting or disabling a vehicle."
 }

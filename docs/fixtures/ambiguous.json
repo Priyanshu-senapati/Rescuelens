@@ -53,6 +53,7 @@
     "deep": {"label": "Hyundai Sonata Hybrid Sedan 2012", "prob": 0.51},
     "hybrid": {"label": "Hyundai Sonata Hybrid Sedan 2012", "prob": 0.48, "status": "ambiguous"}
   },
+  "brand_evidence": {"whole_car": [{"make": "Hyundai", "prob": 0.97}, {"make": "Kia", "prob": 0.01}, {"make": "Toyota", "prob": 0.005}], "details": [{"make": "Hyundai", "prob": 0.93}, {"make": "Toyota", "prob": 0.02}, {"make": "Honda", "prob": 0.01}], "combined": [{"make": "Hyundai", "prob": 0.95}, {"make": "Toyota", "prob": 0.012}, {"make": "Honda", "prob": 0.006}], "weight": 0.5, "conflict": false},
   "timing_ms": {"detect": 140, "classify": 420, "classical": 95, "total": 690},
   "disclaimer": "Decision-support prototype. Vehicle identification is probabilistic. Never rely on it alone for cutting, lifting or disabling a vehicle."
 }

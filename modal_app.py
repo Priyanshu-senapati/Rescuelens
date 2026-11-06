@@ -21,7 +21,8 @@ image = (
     .add_local_dir(ROOT / "docs" / "fixtures", "/root/docs/fixtures")
     .add_local_dir(ROOT / "frontend" / "dist", "/root/frontend/dist")
 )
-for name in MODEL_FILES:
+OPTIONAL_FILES = ["brand_parts.json", "brand_parts_int8.onnx"]   # close-up brand expert, shipped when trained
+for name in MODEL_FILES + [f for f in OPTIONAL_FILES if (ROOT / "models" / f).exists()]:
     image = image.add_local_file(ROOT / "models" / name, f"/root/models/{name}")
 
 app = modal.App("rescuelens", image=image)

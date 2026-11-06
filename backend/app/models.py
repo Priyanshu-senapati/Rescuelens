@@ -107,3 +107,23 @@ class Baseline:
     def __call__(self, car: np.ndarray) -> np.ndarray:
         z = ((classical.baseline_features(car) - self.mean) / self.scale - self.pca_mean) @ self.components.T
         return softmax(self.coef @ z + self.bias)
+
+
+class BrandParts:
+    """Close-up brand expert (training/train_brand_parts.py): the car crop squashed to 448 px, nine 224 px windows at
+    offsets 0 / 112 / 224, mean of the window logits -> calibrated make probabilities."""
+
+    def __init__(self, model_dir: Path):
+        cfg = json.loads((model_dir / "brand_parts.json").read_text(encoding="utf-8"))
+        self.makes: list[str] = cfg["makes"]
+        self.part, self.grid, self.temperature, self.weight = cfg["part"], cfg["grid"], cfg["temperature"], cfg["weight"]
+        self.rule: str = cfg.get("rule", "linear")
+        self.mean, self.std = np.array(cfg["mean"], np.float32), np.array(cfg["std"], np.float32)
+        self.session = _session(model_dir / "brand_parts_int8.onnx")
+
+    def __call__(self, car: np.ndarray) -> np.ndarray:
+        sq = np.asarray(Image.fromarray(car).resize((self.grid, self.grid), Image.BILINEAR), dtype=np.float32) / 255
+        offsets = (0, (self.grid - self.part) // 2, self.grid - self.part)
+        windows = np.stack([sq[y:y + self.part, x:x + self.part] for y in offsets for x in offsets])
+        x = np.ascontiguousarray(((windows - self.mean) / self.std).transpose(0, 3, 1, 2), dtype=np.float32)
+        return softmax(self.session.run(None, {"input": x})[0].mean(0) / self.temperature)

@@ -1,4 +1,4 @@
-import type { Result, Safety } from "../types";
+import type { BrandEvidence, Result, Safety } from "../types";
 import RescueSheet from "./RescueSheet";
 import { Bar, STATUS, pct } from "./bits";
 
@@ -44,6 +44,39 @@ function SafetyBanner({ s }: { s: Safety }) {
   );
 }
 
+function BrandPanel({ e }: { e: BrandEvidence }) {
+  const rows: { name: string; votes: BrandEvidence["whole_car"]; strong?: boolean }[] = [
+    { name: "Whole car", votes: e.whole_car },
+    { name: "Close-ups: badge, grille, lights", votes: e.details },
+    { name: "Combined", votes: e.combined, strong: true },
+  ];
+  return (
+    <div className="rounded-lg border border-line bg-sheet p-5">
+      <h3 className="font-display text-2xl font-semibold">Brand evidence</h3>
+      <p className="mt-1 text-sm text-ink-soft">Two experts vote on the brand: one sees the whole car, one only zoomed-in details.</p>
+      {e.conflict && (
+        <p className="mt-3 rounded-md border border-warn bg-[#fbf4e6] px-3 py-2 font-medium">
+          The experts disagree: close-ups say {e.details[0].make}, the whole car says {e.whole_car[0].make}.
+        </p>
+      )}
+      <dl className="mt-3 space-y-3">
+        {rows.map((row) => (
+          <div key={row.name}>
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-sm text-ink-soft">{row.name}</dt>
+              <dd className={`tabular ${row.strong ? "font-semibold" : ""}`}>{row.votes[0].make} {pct(row.votes[0].prob)}</dd>
+            </div>
+            <Bar value={row.votes[0].prob} tone={row.strong ? "bg-draft" : "bg-ink-soft"} label={`${row.name}: ${row.votes[0].make}`} />
+            <p className="mt-0.5 text-xs text-ink-soft">
+              then {row.votes.slice(1).map((v) => `${v.make} ${pct(v.prob)}`).join(", ")}
+            </p>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
 export default function ResultPanel({ result: r }: { result: Result }) {
   const st = STATUS[r.status];
   const depth = DEPTH[r.resolved_level];
@@ -76,6 +109,8 @@ export default function ResultPanel({ result: r }: { result: Result }) {
       </div>
 
       {r.safety && <SafetyBanner s={r.safety} />}
+
+      {r.brand_evidence && <BrandPanel e={r.brand_evidence} />}
 
       {r.hierarchy.length > 0 && (
         <div className="rounded-lg border border-line bg-sheet p-5">

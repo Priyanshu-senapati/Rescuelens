@@ -31,6 +31,7 @@ In development, Vite proxies `/api` to `http://localhost:8000`.
 | `steps` | `[{key, title, caption, image}]` | classical pipeline images as data URLs, in order: `original`, `enhanced`, `edges`, `contours`, `roi`, `wheels`, `colour` |
 | `features` | `{dominant_colours:[{hex, name, share}], aspect_ratio, wheel_count, wheelbase_ratio}` | classical measurements |
 | `comparison` | `{classical, deep, hybrid}` each `{label, prob}`; `hybrid` also has `status` | same photo through the 3 approaches |
+| `brand_evidence` | `{whole_car, details, combined: [{make, prob}] x3, weight, conflict}` or `null` | brand votes from the whole-car classifier (summed per make) and the close-up expert (badge, grille, lights); `combined` drives the answer; `conflict` = the two experts' top brands differ. `null` without the expert (and in offline mode) |
 | `timing_ms` | `{detect, classify, classical, total}` | latency |
 | `disclaimer` | string | always shown |
 

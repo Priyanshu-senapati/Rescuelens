@@ -70,7 +70,22 @@ export interface Result {
   timing_ms: { detect: number; classify: number; classical: number; total: number };
   disclaimer: string;
   mock?: boolean;
+  brand_evidence?: BrandEvidence | null; // absent in offline mode (the close-up expert runs on the server only)
   offline?: boolean;
+}
+
+export interface MakeVote {
+  make: string;
+  prob: number;
+}
+
+/** Two experts on the brand: the whole-car classifier (summed per make) and the close-up expert (badge, grille, lights). */
+export interface BrandEvidence {
+  whole_car: MakeVote[];
+  details: MakeVote[];
+  combined: MakeVote[];
+  weight: number;
+  conflict: boolean;
 }
 
 export interface Metrics {
