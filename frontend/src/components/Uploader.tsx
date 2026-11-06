@@ -1,5 +1,6 @@
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { MAX_BYTES } from "../image";
+import HeroSheet from "./HeroSheet";
 import OfflineCard from "./OfflineCard";
 
 interface Props {
@@ -50,9 +51,9 @@ export default function Uploader({ onPick, onLive }: Props) {
   }
 
   return (
-    <section className="grid items-start gap-8 pt-4 lg:grid-cols-[1.1fr_1fr] lg:pt-10">
+    <section className="grid items-start gap-x-8 gap-y-6 pt-4 lg:grid-cols-[1.1fr_1fr] lg:pt-8">
       <div>
-        <h1 className="max-w-[13ch] font-display text-5xl font-bold leading-[0.95] sm:text-7xl">
+        <h1 className="font-display text-5xl font-bold leading-[0.95] text-balance sm:text-7xl">
           Which vehicle is this, and is it safe to cut?
         </h1>
         <p className="mt-5 max-w-[60ch] text-lg leading-relaxed text-ink-soft">
@@ -62,6 +63,7 @@ export default function Uploader({ onPick, onLive }: Props) {
         </p>
       </div>
 
+      <div className="space-y-6 lg:row-span-2">
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -108,26 +110,29 @@ export default function Uploader({ onPick, onLive }: Props) {
         )}
         <OfflineCard />
       </div>
-
-      <div className="lg:col-span-2">
-        <h2 className="font-display text-2xl font-semibold">No photo to hand? Try one of these</h2>
-        <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-          {SAMPLES.map((s) => (
-            <li key={s.file}>
-              <button
-                onClick={() => pickSample(s.file)}
-                className="group block w-full overflow-hidden rounded-lg border border-line bg-sheet text-left hover:border-draft"
-              >
-                <img src={`/samples/${s.file}`} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover" />
-                <span className="block px-3 py-2 text-sm font-medium group-hover:text-draft">{s.label}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-2 text-sm text-ink-soft">
-          <a href="/samples/CREDITS.md" target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-draft">Photo credits</a>
-        </p>
+        <div>
+          <h2 className="font-display text-2xl font-semibold">No photo to hand? Try one of these</h2>
+          <ul className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4">
+            {SAMPLES.map((s) => (
+              <li key={s.file}>
+                <button
+                  onClick={() => pickSample(s.file)}
+                  className="group flex h-full w-full flex-col justify-start overflow-hidden rounded-lg border border-line bg-sheet text-left hover:border-draft"
+                >
+                  <img src={`/samples/${s.file}`} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover" />
+                  <span className="block px-2 py-1.5 text-sm font-medium leading-tight group-hover:text-draft">{s.label}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-sm text-ink-soft">
+            <a href="/samples/CREDITS.md" target="_blank" rel="noreferrer" className="inline-flex min-h-6 items-center underline underline-offset-2 hover:text-draft">Photo credits</a>
+          </p>
+        </div>
       </div>
+
+      <HeroSheet />
+
     </section>
   );
 }

@@ -93,6 +93,94 @@ body {
   color: var(--color-sheet);
 }
 
+/* Rescue-sheet drawing: the outline draws itself, then the danger appears. */
+.sheet-draw {
+  stroke-dasharray: 1;
+  animation: sheet-draw 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes sheet-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+.sheet-draw-late {
+  animation: fade-in 420ms ease-out 450ms both;
+}
+
+.sheet-zone {
+  animation: zone-wipe 520ms cubic-bezier(0.16, 1, 0.3, 1) 700ms both;
+}
+
+@keyframes zone-wipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(-30px -30px -30px -30px); }
+}
+
+.sheet-cable {
+  stroke-dasharray: 10 7;
+  animation: fade-in 300ms ease-out 900ms both, cable-flow 900ms linear 900ms infinite;
+}
+
+@keyframes cable-flow {
+  to { stroke-dashoffset: -17; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Analysing a photo: its real edge map, a sweep, then the drawing narrows to the vehicle and fades. */
+.edges-on {
+  animation: fade-in 240ms ease-out both;
+}
+
+.edges-fade {
+  animation: edges-fade 1700ms ease-out both;
+}
+
+@keyframes edges-fade {
+  0%, 40% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.scan-sweep {
+  top: 0;
+  background: linear-gradient(to bottom, transparent, rgb(124 192 255 / 0.28) 85%, rgb(124 192 255 / 0.9));
+  animation: scan-sweep 1100ms ease-in-out infinite alternate;
+}
+
+@keyframes scan-sweep {
+  from { top: -6rem; }
+  to { top: 100%; }
+}
+
+/* The verdict arrives with the ticks. */
+.rise {
+  animation: rise 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.rise-2 {
+  animation-delay: 120ms;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.sweep-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dot-in 260ms cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+
+@keyframes dot-in {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
 .tabular {
   font-variant-numeric: tabular-nums;
 }

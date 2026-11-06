@@ -89,7 +89,7 @@ export default function App() {
   const closeLive = useCallback(() => setLive(false), []);
 
   const result = phase.kind === "done" ? phase.result : null;
-  const stage = STAGES[Math.min(STAGES.length - 1, Math.floor(elapsed / 1.2))];
+  const stageIndex = Math.min(STAGES.length - 1, Math.floor(elapsed / 1.2));
 
   return (
     <div className="min-h-dvh">
@@ -131,7 +131,7 @@ export default function App() {
           <>
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
               <div className="order-2 space-y-3 lg:order-1 lg:sticky lg:top-4 lg:self-start">
-                <PhotoBox url={photo.url} result={result} />
+                <PhotoBox url={photo.url} width={photo.width} height={photo.height} result={result} loading={phase.kind === "loading"} />
                 <div className="flex flex-wrap gap-2">
                   <button onClick={reset} className="min-h-11 rounded-md border border-ink/30 bg-sheet px-4 font-medium hover:border-ink">
                     Check another vehicle
@@ -147,10 +147,14 @@ export default function App() {
               <section className="order-1 lg:order-2" aria-live="polite" aria-busy={phase.kind === "loading"}>
                 {phase.kind === "loading" && (
                   <div className="rounded-lg border border-line bg-sheet p-6">
-                    <p className="font-display text-2xl font-semibold">{stage}…</p>
-                    <div className="mt-4 h-1.5 overflow-hidden rounded bg-draft-soft">
-                      <div className="h-full w-1/3 animate-pulse rounded bg-draft" />
-                    </div>
+                    <ol className="space-y-2">
+                      {STAGES.map((s, i) => (
+                        <li key={s} className={`flex items-center gap-3 font-display text-2xl font-semibold ${i > stageIndex ? "opacity-35" : ""}`}>
+                          <span aria-hidden="true" className={`h-3 w-3 shrink-0 rounded-full ${i < stageIndex ? "bg-ok" : i === stageIndex ? "animate-pulse bg-draft" : "bg-line"}`} />
+                          {s}
+                        </li>
+                      ))}
+                    </ol>
                     {elapsed > 6 && (
                       <p className="mt-4 text-ink-soft">
                         The server may be waking up after a quiet period. The first answer can take up to half a minute.

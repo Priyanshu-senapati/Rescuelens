@@ -4,7 +4,8 @@ import { captureFrame, type Prepared } from "../image";
 import { EdgeRenderer, type Box } from "../live/edges";
 import { LOCK_FRAMES, START, advance, type ScanState } from "../live/stability";
 import type { Result } from "../types";
-import { HazardLocation, STATUS, pct } from "./bits";
+import RescueSheet from "./RescueSheet";
+import { STATUS, pct } from "./bits";
 
 interface Props {
   onClose: () => void;
@@ -291,10 +292,10 @@ export default function LiveCamera({ onClose, onUsePhoto, onAccept }: Props) {
               <div className="mt-3">
                 <p className={`font-display text-2xl font-bold leading-tight ${danger ? "text-hv" : "text-warn"}`}>{danger ? "High voltage" : "Powertrain unknown"}</p>
                 <p className="mt-0.5 font-medium">{locked.result.safety.message}</p>
-                <HazardLocation s={locked.result.safety} />
+                <RescueSheet s={locked.result.safety} />
               </div>
             )}
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="sticky bottom-0 -mx-5 mt-4 flex flex-wrap gap-2 bg-sheet px-5 py-3 sm:-mx-6 sm:px-6">
               <button
                 onClick={() => {
                   handedOff.current = true;
@@ -308,7 +309,7 @@ export default function LiveCamera({ onClose, onUsePhoto, onAccept }: Props) {
                 Scan again
               </button>
             </div>
-            <p className="mt-3 text-sm text-ink-soft">{locked.result.disclaimer}</p>
+            <p className="text-sm text-ink-soft">{locked.result.disclaimer}</p>
           </div>
         </div>
       )}

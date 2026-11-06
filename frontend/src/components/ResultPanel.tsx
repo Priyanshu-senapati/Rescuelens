@@ -1,5 +1,6 @@
 import type { Result, Safety } from "../types";
-import { Bar, HazardLocation, STATUS, pct } from "./bits";
+import RescueSheet from "./RescueSheet";
+import { Bar, STATUS, pct } from "./bits";
 
 const LEVEL_NAME = { make: "Brand", family: "Model family", vehicle: "Exact model and year" } as const;
 const DEPTH = { none: 0, make: 1, family: 2, vehicle: 3 } as const;
@@ -16,7 +17,7 @@ function SafetyBanner({ s }: { s: Safety }) {
     );
   const danger = s.level === "danger";
   return (
-    <div role="alert" className={`flex overflow-hidden rounded-lg border-2 ${danger ? "border-hv bg-[#fff2e9]" : "border-warn bg-[#fbf4e6]"}`}>
+    <div role="alert" className={`rise rise-2 flex overflow-hidden rounded-lg border-2 ${danger ? "border-hv bg-[#fff2e9]" : "border-warn bg-[#fbf4e6]"}`}>
       {danger && <div className="hazard-stripes w-3 shrink-0 sm:w-4" aria-hidden="true" />}
       <div className="p-4 sm:p-5">
         <p className={`font-display text-3xl font-bold leading-none ${danger ? "text-hv" : "text-warn"}`}>
@@ -31,7 +32,7 @@ function SafetyBanner({ s }: { s: Safety }) {
             </li>
           ))}
         </ul>
-        <HazardLocation s={s} />
+        <RescueSheet s={s} />
         {s.guide && (
           <a href={s.guide.url} target="_blank" rel="noreferrer"
             className="mt-4 inline-flex min-h-11 items-center rounded-md bg-ink px-4 font-semibold text-paper hover:bg-draft">
@@ -60,8 +61,11 @@ export default function ResultPanel({ result: r }: { result: Result }) {
         </p>
       )}
 
-      <div className="rounded-lg border border-line bg-sheet p-5">
-        <p className={`inline-block rounded-sm px-2.5 py-1 font-semibold text-white ${st.chip}`}>{st.title}</p>
+      <div className="rise rounded-lg border border-line bg-sheet p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className={`inline-block rounded-sm px-2.5 py-1 font-semibold text-white ${st.chip}`}>{st.title}</p>
+          <p className="tabular text-sm text-ink-soft">Answered in {(r.timing_ms.total / 1000).toFixed(1)} s</p>
+        </div>
         <p className="mt-2 font-display text-4xl font-bold leading-[1.05]">{r.headline}</p>
         <p className="mt-2 text-ink-soft">{st.note}</p>
         {r.status === "unknown" && r.prediction && (
@@ -141,7 +145,7 @@ export default function ResultPanel({ result: r }: { result: Result }) {
       )}
 
       <p className="text-sm text-ink-soft">
-        Answered in {(r.timing_ms.total / 1000).toFixed(1)} s. {r.disclaimer}
+        {r.disclaimer}
       </p>
     </div>
   );

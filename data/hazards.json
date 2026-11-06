@@ -1,68 +1,77 @@
 {
-  "_note": "High-voltage classes in Stanford Cars (verified against the 196 class names). Every location below was read from the cited manufacturer document, never from memory: see docs/hazard-sources.md for pages and hosts. Leave a field null rather than guess. 'Passenger side' is the guide's wording for US left-hand-drive cars.",
+  "_note": "High-voltage classes in Stanford Cars (verified against the 196 class names). Every location below was read from the cited manufacturer document, never from memory: see docs/hazard-sources.md for pages and hosts. Leave a field null rather than guess. 'Passenger side' is the guide's wording for US left-hand-drive cars. 'schematic' places the battery region on the rescue-sheet drawing; only draw a cable route a guide states.",
   "high_voltage": {
     "BMW ActiveHybrid 5 Sedan 2012": {
       "powertrain": "hybrid",
       "guide": "https://ff.mts-online.com/data/pdf/BMW_5er_Serie_F10_2011_Active_Hybrid.pdf",
       "guide_title": "BMW ActiveHybrid 5 rescue sheet (German)",
       "battery": "Under the luggage compartment trim, in the boot. Up to 385 V.",
-      "hv_cables": "Orange insulation. The rescue disconnect is reached from the boot, after lifting out the luggage floor trim."
+      "hv_cables": "Orange insulation. The rescue disconnect is reached from the boot, after lifting out the luggage floor trim.",
+      "schematic": {"body": "sedan", "zone": "boot", "cable": "none"}
     },
     "Chevrolet Silverado 1500 Hybrid Crew Cab 2012": {
       "powertrain": "hybrid",
       "guide": "https://morongocsd.specialdistrict.org/files/847ddc729/Chevrolet+Tahoe+HEV+2008-2013+ERG.pdf",
       "guide_title": "GM two-mode hybrid first responder guide",
       "battery": "In a metal case under the second-row rear seat sub-floor. 300 V, and it cannot be disabled.",
-      "hv_cables": "Orange means high voltage, blue means intermediate voltage. Do not cut the orange 300 V cables."
+      "hv_cables": "Orange means high voltage, blue means intermediate voltage. Do not cut the orange 300 V cables.",
+      "schematic": {"body": "pickup", "zone": "under_rear_seat", "cable": "none"}
     },
     "Chevrolet Tahoe Hybrid SUV 2012": {
       "powertrain": "hybrid",
       "guide": "https://morongocsd.specialdistrict.org/files/847ddc729/Chevrolet+Tahoe+HEV+2008-2013+ERG.pdf",
       "guide_title": "GM two-mode hybrid first responder guide",
       "battery": "In a metal case under the second-row rear seat sub-floor. 300 V, and it cannot be disabled.",
-      "hv_cables": "Orange means high voltage, blue means intermediate voltage. Do not cut the orange 300 V cables."
+      "hv_cables": "Orange means high voltage, blue means intermediate voltage. Do not cut the orange 300 V cables.",
+      "schematic": {"body": "suv", "zone": "under_rear_seat", "cable": "none"}
     },
     "Chevrolet Malibu Hybrid Sedan 2010": {
       "powertrain": "hybrid",
       "guide": "https://boronextrication.com/wp-content/uploads/2010/11/Chevrolet-Malibu-2007-Saturn-AURA-Green-Line-Hybrid.pdf",
       "guide_title": "GM Malibu Hybrid emergency response guide",
       "battery": "In the trunk, directly behind the rear passenger seats. 36 V.",
-      "hv_cables": "Blue sheathing, not orange (36-42 V), in a rigid metal conduit where it runs under the car. Do not cut it: arc hazard."
+      "hv_cables": "Blue sheathing, not orange (36-42 V), in a rigid metal conduit where it runs under the car. Do not cut it: arc hazard.",
+      "schematic": {"body": "sedan", "zone": "behind_rear_seat", "cable": "underbody", "cable_colour": "blue"}
     },
     "GMC Yukon Hybrid SUV 2012": {
       "powertrain": "hybrid",
       "guide": "https://morongocsd.specialdistrict.org/files/847ddc729/Chevrolet+Tahoe+HEV+2008-2013+ERG.pdf",
       "guide_title": "GM two-mode hybrid first responder guide",
       "battery": "In a metal case under the second-row rear seat sub-floor. 300 V, and it cannot be disabled.",
-      "hv_cables": "Orange means high voltage, blue means intermediate voltage. Do not cut the orange 300 V cables."
+      "hv_cables": "Orange means high voltage, blue means intermediate voltage. Do not cut the orange 300 V cables.",
+      "schematic": {"body": "suv", "zone": "under_rear_seat", "cable": "none"}
     },
     "Hyundai Sonata Hybrid Sedan 2012": {
       "powertrain": "hybrid",
       "guide": "https://boronextrication.com/wp-content/uploads/2010/11/LF-SONATA-HEV-Emergency-Response-Guide.pdf",
       "guide_title": "Hyundai Sonata Hybrid emergency response guide",
       "battery": "Behind the rear seat, in the trunk area. 270 V.",
-      "hv_cables": "Orange. One runs under the car along the passenger side, from the rear to the engine bay; more in the engine bay."
+      "hv_cables": "Orange. One runs under the car along the passenger side, from the rear to the engine bay; more in the engine bay.",
+      "schematic": {"body": "sedan", "zone": "behind_rear_seat", "cable": "underbody", "cable_colour": "orange"}
     },
     "Fisker Karma Sedan 2012": {
       "powertrain": "hybrid",
       "guide": "https://www.morongovalleyfire.org/files/14cfd88f9/Fisker+Karma+PHEV+2011-2012+ERG.pdf",
       "guide_title": "Fisker high-voltage safety and first response guide",
       "battery": "Runs along the centre tunnel to behind the rear seats (guide's do-not-cut diagram). About 400 V, live at all times. Manual disconnect under the left rear seat cushion.",
-      "hv_cables": "Orange insulation, running the length of the car. Do not cut under the car in front of, behind or through the tunnel."
+      "hv_cables": "Orange insulation, running the length of the car. Do not cut under the car in front of, behind or through the tunnel.",
+      "schematic": {"body": "sedan", "zone": "tunnel", "cable": "none"}
     },
     "Nissan Leaf Hatchback 2012": {
       "powertrain": "ev",
       "guide": "https://owners.nissanusa.com/content/techpub/ManualsAndGuides/LEAF/2012/2012-leaf-dismantling-guide.pdf",
       "guide_title": "Nissan 2012 LEAF guide (responder sections included)",
       "battery": "Encased in steel and mounted underneath the vehicle. Do not crib under it. Service disconnect on the rear seat floor.",
-      "hv_cables": "All high-voltage harnesses are coated in orange. Routing is shown in the guide's diagram."
+      "hv_cables": "All high-voltage harnesses are coated in orange. Routing is shown in the guide's diagram.",
+      "schematic": {"body": "hatch", "zone": "underfloor", "cable": "none"}
     },
     "Tesla Model S Sedan 2012": {
       "powertrain": "ev",
       "guide": "https://digitalassets.tesla.com/tesla-contents/image/upload/2012-13_Model_S_Emergency_Response_Guide_en.pdf",
       "guide_title": "Tesla Model S 2012-13 emergency response guide",
       "battery": "Below the floor, under a floor pan, across a large section of the undercarriage. Never breach it when lifting.",
-      "hv_cables": "Orange. Routed under the rear seats and inside the rocker panel on the right side front."
+      "hv_cables": "Orange. Routed under the rear seats and inside the rocker panel on the right side front.",
+      "schematic": {"body": "sedan", "zone": "underfloor", "cable": "none"}
     }
   }
 }
