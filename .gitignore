@@ -28,3 +28,4 @@ private_photos/
 runs/
 training/.quick/
 training/*.log
+training/*.err
