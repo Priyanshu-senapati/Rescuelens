@@ -26,7 +26,7 @@ Full tables (robustness, ablation, thresholds, failure cases): [`eval_P5_T50.md`
 | `data/` | class names, high-voltage class list |
 | `docs/` | API contract, fixtures, design doc |
 
-Design document + architecture diagram: [docs/design.md](docs/design.md) · API: [docs/api-contract.md](docs/api-contract.md) · Evaluation: `eval_P5_T50.md`
+**Build plan / handover (pending work, dropped features): [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md)** · Design document + architecture diagram: [docs/design.md](docs/design.md) · API: [docs/api-contract.md](docs/api-contract.md) · Evaluation: `eval_P5_T50.md`
 
 ## Run it
 
