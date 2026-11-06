@@ -123,7 +123,7 @@ and update the "Run it" section of the README. (Decide as a team; it makes the m
    Live camera goes into step 4 if the phone and venue connection allow it (see `docs/field-kit.md` section 5).
 7. (2:50-3:00) "Most classifiers are built to be right; RescueLens is built to know when being wrong is dangerous."
 
-Viva questions every member should answer: why ConvNeXt + why 384 px; why YOLO pretrained (not fine-tuned); what CLAHE did
+Viva questions every member should answer: why ConvNeXt + why 384 px; why fine-tune YOLO (and on which boxes); what CLAHE did
 (and why we turned it off for the classifier); temperature scaling and ECE; the summed-probability rule and its threshold;
 how the unknown check works (kNN cosine distance on embeddings, 95th percentile of validation); INT8 dynamic quantization and
 why only MatMul/Gemm; one failure case each.

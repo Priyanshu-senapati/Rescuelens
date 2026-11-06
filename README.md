@@ -14,7 +14,7 @@
 
 <img src="docs/img/live-lock.gif" alt="Live camera mode: edges are drawn over the car, corner ticks lock on, and a high-voltage verdict with the battery location rises into view" width="800">
 
-<sub>Real answers from the deployed model, with this repository's guide data. The camera feed is simulated from a sample photo.</sub>
+<sub>Real answers from the deployed model. The camera feed is simulated from a sample photo.</sub>
 
 </div>
 
@@ -30,9 +30,9 @@ RescueLens identifies a vehicle from how it looks, across 196 make, model and ye
 
 ## One model, three honest answers
 
-![Three results from the real model: identified Tesla Model S with a high-voltage warning, a partly hidden Chevrolet where a hybrid cannot be ruled out, and a Tata Nexon answered as not recognised](docs/img/three-answers.png)
+![Three results from the real model: identified Tesla Model S with a high-voltage warning, a Chevrolet Silverado with its rear hidden where a hybrid cannot be ruled out, and a Tata Nexon answered as not recognised](docs/img/three-answers.png)
 
-<sub>Real answers from the deployed model, with this repository's guide data.</sub>
+<sub>Real answers from the deployed model.</sub>
 
 | Answer | When | What the responder is told |
 |---|---|---|
@@ -63,8 +63,9 @@ Answers from the real deployed model, 6 Nov 2026.
 |---|---|---|
 | Clear daylight photo | **Identified:** BMW M3 Coupe 2012, 98% | The easy case, with the full pipeline on show |
 | Hybrid that looks like a petrol car | **Identified:** Hyundai Sonata Hybrid 2012, 99%, high voltage | The whole pitch in one photo |
-| Taken at night | **Identified:** Audi S4 Sedan 2012, 92% | Darkness barely hurts accuracy |
-| Partly hidden | **Not certain:** Chevrolet, hybrid can't be ruled out | Uncertainty changes the advice |
+| Taken at night | **Identified:** Audi S4 Sedan 2012, 84% | Darkness barely hurts accuracy |
+| Partly hidden | **Identified:** Chevrolet Tahoe Hybrid 2012, 64%, high voltage | Still finds the hybrid with part of it covered |
+| Hybrid or not? Rear hidden | **Not certain:** Chevrolet Silverado family, hybrid can't be ruled out | Uncertainty changes the advice |
 | Electric car | **Identified:** Tesla Model S 2012, 98%, high voltage | Finds the EV and warns about it |
 | Look-alike trim: S5 or A5? | **Not certain:** Audi, model uncertain | Its most frequent mix-up, and it says so |
 | Indian car outside the 196 models | **Not recognised** | Refuses to guess at a Tata Nexon |

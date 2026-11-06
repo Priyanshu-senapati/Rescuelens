@@ -18,7 +18,7 @@
 | Question | Short answer |
 |---|---|
 | Why ConvNeXt at 384 px? | Fine-grained classes differ in small details, so resolution matters. ConvNeXt-Small (ImageNet-22k pretrained) beat Tiny on validation, 94.23% to 93.74%. Test: 94.55% top-1, and 96.7% of unknown cars caught against Tiny's 88.3%. |
-| Why YOLO pretrained, not fine-tuned? | Stanford photos hold one vehicle, so COCO YOLO11s already finds it: mean IoU 0.886, mAP@0.5 0.892. We have no labelled crash data to tune on. Fine-tuning on Stanford boxes is listed as future work. |
+| Why fine-tune YOLO? | COCO weights already found the single car (mean IoU 0.886) but boxes were loose. Fine-tuned on the Stanford **train** boxes as one class: IoU 0.954, mAP@0.5 0.999, mAP@0.5:0.95 0.941. No crash data exists to tune on, so that gap remains. |
 | What did CLAHE do? | Before the classifier it did not help (within +/-0.15 points on dark photos), because training already darkens images. So it is off there. It still retries the detector and drives the pipeline view. We kept that as a measured result. |
 | Temperature scaling and ECE? | Divide logits by T = 0.768, fitted on validation, so "80% sure" means about 80% right. ECE fell from 0.098 to 0.011. Accuracy doesn't change, but thresholds become meaningful. |
 | The summed-probability rule? | Add up the probability of all 9 hybrid/EV classes and warn at 0.05 or above. It misses 1.15% with 0.69% false alarms, against 4.32% missed if we trust the top answer. A miss is far worse than a false alarm. |
