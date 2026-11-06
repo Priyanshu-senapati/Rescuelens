@@ -25,7 +25,7 @@
     "level": "info",
     "message": "No high-voltage system expected for this vehicle.",
     "actions": ["Standard airbag and pretensioner precautions apply", "Confirm the vehicle with VIN or plate"],
-    "guide": null
+    "guide": null, "location_vehicle": null, "battery": null, "hv_cables": null
   },
   "unknown": {"score": 0.18, "threshold": 0.55, "is_unknown": false},
   "quality": {"brightness": 64, "contrast": 58, "sharpness": 80, "resolution_px": 490, "cut_off": false, "issues": []},

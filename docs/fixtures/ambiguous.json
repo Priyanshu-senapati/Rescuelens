@@ -30,7 +30,10 @@
       "Look for HYBRID badges before cutting",
       "Confirm the vehicle with VIN or plate"
     ],
-    "guide": {"title": "Hyundai Sonata Hybrid - Emergency Response Guide", "url": "https://boronextrication.com/wp-content/uploads/2010/11/LF-SONATA-HEV-Emergency-Response-Guide.pdf"}
+    "guide": {"title": "Hyundai Sonata Hybrid emergency response guide", "url": "https://boronextrication.com/wp-content/uploads/2010/11/LF-SONATA-HEV-Emergency-Response-Guide.pdf"},
+    "location_vehicle": "Hyundai Sonata Hybrid Sedan 2012",
+    "battery": "Behind the rear seat, in the trunk area. 270 V.",
+    "hv_cables": "Orange. One runs under the car along the passenger side, from the rear to the engine bay; more in the engine bay."
   },
   "unknown": {"score": 0.31, "threshold": 0.55, "is_unknown": false},
   "quality": {"brightness": 22, "contrast": 35, "sharpness": 61, "resolution_px": 550, "cut_off": false, "issues": ["Low light"]},
