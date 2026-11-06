@@ -1,0 +1,61 @@
+@import "tailwindcss";
+@import "@fontsource/barlow/400.css";
+@import "@fontsource/barlow/500.css";
+@import "@fontsource/barlow/600.css";
+@import "@fontsource/barlow-condensed/600.css";
+@import "@fontsource/barlow-condensed/700.css";
+
+/* Rescue-sheet palette: technical-drawing paper, ink, drafting blue; safety orange reserved for high voltage. */
+@theme {
+  --font-sans: "Barlow", system-ui, sans-serif;
+  --font-display: "Barlow Condensed", "Barlow", system-ui, sans-serif;
+  --color-paper: #e9edf0;
+  --color-sheet: #ffffff;
+  --color-ink: #1c2733;
+  --color-ink-soft: #4d5b69;
+  --color-line: #c5ced6;
+  --color-draft: #2f5d8a;
+  --color-draft-soft: #dce6f0;
+  --color-hv: #e8651a;
+  --color-ok: #2e7d4f;
+  --color-warn: #a86b12;
+  --color-unknown: #5b6773;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  /* faint drafting grid */
+  background-image:
+    linear-gradient(to right, rgb(47 93 138 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(47 93 138 / 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-draft);
+  outline-offset: 2px;
+}
+
+.hazard-stripes {
+  background: repeating-linear-gradient(-45deg, var(--color-hv) 0 12px, var(--color-ink) 12px 24px);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
