@@ -7,7 +7,13 @@
 
 Both come from Wikimedia Commons.
 
-## Older samples: source not recorded
+## Samples from the Stanford Cars test split
 
-`clear.jpg`, `electric.jpg`, `hidden.jpg`, `night.jpg` and `sonata-hybrid.jpg` were added earlier without a record of where they
-came from. Whoever added them should fill this in, or replace them, before the repository is shown publicly.
+`clear.jpg` (BMW M3 Coupe 2012), `sonata-hybrid.jpg` (Hyundai Sonata Hybrid Sedan 2012), `electric.jpg` (Tesla Model S
+Sedan 2012), `night.jpg` (Audi S4 Sedan 2012), `hidden.jpg` (Chevrolet Tahoe Hybrid SUV 2012) and `ambiguous.jpg`
+(Chevrolet Silverado 1500 Hybrid Crew Cab 2012) are images from the **test split of the Stanford Cars dataset**
+(J. Krause, M. Stark, J. Deng, L. Fei-Fei, "3D Object Representations for Fine-Grained Categorization", ICCV Workshops
+2013), the dataset this problem statement prescribes. The dataset's images were collected from the web for
+non-commercial research use; they are shown here only to demonstrate the model on its own benchmark.
+Changes: resized to 900 px; `night.jpg` darkened to 22% brightness; `hidden.jpg` and `ambiguous.jpg` have a grey block
+painted over part of the vehicle to simulate occlusion.

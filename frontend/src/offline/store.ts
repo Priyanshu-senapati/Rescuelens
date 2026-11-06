@@ -1,7 +1,7 @@
 // Offline downloads live in Cache Storage, so a page reload or lost signal doesn't lose them.
 const MODEL_CACHE = "rescuelens-models-v1";
 const FILES = ["config.json", "classifier_int8.onnx", "train_emb.npy", "yolo11s.onnx"];
-const SAMPLES = ["clear", "sonata-hybrid", "night", "hidden", "electric", "ambiguous-audi-s5", "unknown-tata-nexon"];
+const SAMPLES = ["clear", "sonata-hybrid", "night", "hidden", "ambiguous", "electric", "ambiguous-audi-s5", "unknown-tata-nexon"];
 const SHELL_CACHE = "rescuelens-shell-v1";
 const url = (name: string) => `/offline/${name}`;
 

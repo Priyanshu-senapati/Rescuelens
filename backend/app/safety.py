@@ -98,28 +98,39 @@ def _safety(probs: np.ndarray, classes: list[CarClass], unknown: bool, t: Thresh
 
 def decide(probs: np.ndarray, unknown_score: float, classes: list[CarClass], t: Thresholds,
            quality_issues: list[str] | None = None) -> dict:
-    """probs = calibrated softmax over the classes. Returns the decision part of the API response."""
+    """probs = calibrated softmax over the classes. Returns the decision part of the API response.
+
+    Brand first: the make is the one with the most summed probability, then the strongest family inside that make, then
+    the likeliest vehicle inside that family. A single top class can't overrule the combined evidence for another brand
+    (e.g. BMW 3 Series 16% vs Audi S5 12% + S4 6% + A5 + ... on a damaged Audi)."""
     order = np.argsort(-probs)
-    top = classes[order[0]]
-    p_top = float(probs[order[0]])
-    p_family = float(sum(probs[i] for i, c in enumerate(classes) if c.family == top.family))
-    p_make = float(sum(probs[i] for i, c in enumerate(classes) if c.make == top.make))
+    make_p: dict[str, float] = {}
+    family_p: dict[str, float] = {}
+    for i, c in enumerate(classes):
+        make_p[c.make] = make_p.get(c.make, 0.0) + float(probs[i])
+        family_p[c.family] = family_p.get(c.family, 0.0) + float(probs[i])
+    make = max(make_p, key=make_p.get)                                       # ties: first in class order
+    family = max((c.family for c in classes if c.make == make), key=family_p.get)
+    top_i = max((i for i, c in enumerate(classes) if c.family == family), key=lambda i: probs[i])
+    top, p_top = classes[top_i], float(probs[top_i])
+    p_make, p_family = make_p[make], family_p[family]
+    single, p_single = classes[order[0]], float(probs[order[0]])            # raw top-1, before brand reasoning
     is_ood = unknown_score > t.unknown
     unknown = is_ood or p_make < t.make
 
     if unknown:
         status, level = "unknown", "none"
-        headline = ("Unknown vehicle - not one of the 196 supported models" if is_ood
+        headline = ("Not recognised - damaged, unusual or not one of the 196 supported models" if is_ood
                     else "Cannot identify this vehicle with enough confidence")
     elif p_top >= t.identify:
         status, level, headline = "identified", "vehicle", top.label
     elif p_family >= t.family:
-        years = sorted({classes[i].year for i in order[:5] if classes[i].family == top.family and probs[i] >= 0.05})
+        years = sorted({classes[i].year for i in order[:5] if classes[i].family == family and probs[i] >= 0.05})
         year_txt = str(years[0]) if len(years) == 1 else " or ".join(map(str, years))
         status, level = "ambiguous", "family"
-        headline = f"{top.family} family ({year_txt}) - exact variant uncertain"
+        headline = f"{family} family ({year_txt}) - exact variant uncertain"
     else:
-        status, level, headline = "ambiguous", "make", f"{top.make} - model uncertain"
+        status, level, headline = "ambiguous", "make", f"{make} - model uncertain"
 
     safety = _safety(probs, classes, unknown, t)
     if status == "ambiguous" and safety["hv_warning"]:
@@ -127,10 +138,15 @@ def decide(probs: np.ndarray, unknown_score: float, classes: list[CarClass], t: 
 
     second = classes[order[1]]
     reasons = list(quality_issues or [])
-    if second.family == top.family and probs[order[1]] >= 0.15:
+    if second.family == single.family and probs[order[1]] >= 0.15:
         reasons.append("Top two answers are a known look-alike pair")
+    if single.make != make:
+        reasons.append(f"The single top guess ({single.label}, {p_single:.0%}) is not a {make}: "
+                       f"the {make} models together add up to {p_make:.0%}")
+    if status != "identified" and p_single < 0.3:
+        reasons.append(f"No single model stands out (top answer only {p_single:.0%})")
     if is_ood:
-        reasons.append("Looks unlike every car in the training set")
+        reasons.append("Looks unlike the training photos: damage, an unusual angle, or a model outside the 196")
 
     return {
         "status": status, "headline": headline, "resolved_level": level,

@@ -13,6 +13,7 @@ const SAMPLES = [
   { file: "sonata-hybrid.jpg", label: "Hybrid that looks like a petrol car" },
   { file: "night.jpg", label: "Taken at night" },
   { file: "hidden.jpg", label: "Partly hidden" },
+  { file: "ambiguous.jpg", label: "Hybrid or not? Rear hidden" },
   { file: "electric.jpg", label: "Electric car" },
   { file: "ambiguous-audi-s5.jpg", label: "Look-alike trim: S5 or A5?" },
   { file: "unknown-tata-nexon.jpg", label: "Indian car outside the 196 models" },

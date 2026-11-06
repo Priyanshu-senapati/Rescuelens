@@ -100,3 +100,20 @@ def test_hierarchy_probabilities_never_increase_with_depth():
     make, family, vehicle = (h["prob"] for h in r["hierarchy"])
     assert make >= family >= vehicle
     assert r["status"] == "ambiguous" and "2007" in r["headline"] and "2012" in r["headline"]
+
+
+def test_brand_is_decided_by_summed_evidence_not_by_the_single_top_guess():
+    # the damaged Audi S4 case: one BMW class is the single top guess, but the Audi classes together outweigh BMW
+    p = probs(**{"BMW 3 Series Sedan 2012": 0.16, "Audi S5 Coupe 2012": 0.14, "Audi S4 Sedan 2012": 0.12,
+                 "Audi A5 Coupe 2012": 0.11, "Audi S5 Convertible 2012": 0.08, "Audi S4 Sedan 2007": 0.06})
+    r = decide(p, 0.2, CLASSES, T)
+    assert r["hierarchy"][0]["name"] == "Audi" and r["prediction"]["make"] == "Audi"
+    assert r["status"] == "ambiguous" and r["headline"].startswith("Audi - model uncertain")
+    assert any("BMW 3 Series Sedan 2012" in x and "Audi" in x for x in r["reliability"]["reasons"])
+    assert r["top5"][0]["label"] == "BMW 3 Series Sedan 2012"      # the raw ranking is still shown, unedited
+
+
+def test_spread_out_probabilities_are_explained():
+    p = probs(**{"Audi S5 Coupe 2012": 0.2, "Audi A5 Coupe 2012": 0.18, "Audi S4 Sedan 2012": 0.17})
+    reasons = decide(p, 0.2, CLASSES, T)["reliability"]["reasons"]
+    assert any("No single model stands out" in x for x in reasons)

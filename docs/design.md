@@ -94,7 +94,7 @@ flowchart LR
 | Choice | Why |
 |---|---|
 | **ConvNeXt-Small**, ImageNet-22k pretrained, fine-tuned at 384 px | Strong fine-grained transfer; 50 M parameters, 302 ms on 2 CPU threads after INT8. ConvNeXt-Tiny (28 M) was trained first: 94.18% vs 94.55% top-1, 88.3% vs 96.7% unknown cars caught |
-| **YOLO11s** COCO-pretrained (car/bus/truck) | Stanford images are single-vehicle, so a pretrained detector already localises well; no labelled crash data to fine-tune on |
+| **YOLO11s**, COCO-pretrained then fine-tuned on the Stanford **train** boxes (one class) | Mean IoU 0.886 -> 0.954, mAP@0.5 0.892 -> 0.999, mAP@0.5:0.95 0.825 -> 0.941 on the test split; end-to-end top-1 with detector crops 95.0% -> 95.7% (300-photo check). Trade-off: its tighter boxes can stop at an occluder, so with 30% of the vehicle hidden end-to-end accuracy was 73.3% vs 74.7% and 8 vs 6 of 70 hybrids/EVs were missed (within noise at this size, reported honestly) |
 | **Classical baseline**: HOG + HSV histogram + LBP + aspect ratio -> PCA(256) -> logistic regression | Required comparison; uses exactly the same feature code as the app |
 | **Temperature scaling** on validation | Raw softmax is over/under-confident; calibrated probabilities make thresholds meaningful |
 | **kNN embedding distance** for unknown cars | Softmax confidence stays high on unseen models (e.g. Indian cars); distance to known cars does not |
@@ -136,12 +136,16 @@ high-voltage miss / false-alarm rates, classical vs deep vs hybrid, ablation, mo
    answer ("Audi A5/S5 family") is reported when the year cannot be separated.
 3. **Rebadged twins**: *Dodge Sprinter Cargo Van 2009* taken for *Mercedes-Benz Sprinter Van 2012* (8) - the same van
    sold under two brands. A badge-level detail the network rarely sees at 384 px.
-4. **Degraded photos** (robustness table): strong blur drops top-1 to 40%, a 40 px vehicle to 53%, and hiding 45% of
+4. **Occlusion that hides the body style**: a Chevrolet Tahoe Hybrid with its upper rear hidden is taken for a
+   *Chevrolet Avalanche* (98%) and the high-voltage warning does not fire - the two share the same front end, and the
+   fine-tuned detector's box stops at the occluder. With the front hidden instead, the same SUV is still identified as
+   the Tahoe Hybrid (65%) with the warning on. This is the clearest reason the app always says "confirm with VIN or plate".
+5. **Degraded photos** (robustness table): strong blur drops top-1 to 40%, a 40 px vehicle to 53%, and hiding 45% of
    the vehicle to 66%. The quality checks flag these photos ("Blurry", "Low resolution") so the low confidence is
    explained rather than hidden.
-5. **Same body, different powertrain**: Hyundai Sonata Sedan vs Sonata Hybrid 2012. The summed high-voltage
+6. **Same body, different powertrain**: Hyundai Sonata Sedan vs Sonata Hybrid 2012. The summed high-voltage
    probability cuts missed hybrids/EVs from 4.3% (top-1 label) to 1.2%.
-6. **Out-of-distribution cars**: on 60 freely licensed Wikimedia Commons photos of 30 models the network never saw
+7. **Out-of-distribution cars**: on 60 freely licensed Wikimedia Commons photos of 30 models the network never saw
    (Indian models such as Swift, Nexon, Creta, Thar, Innova; post-2012 EVs such as Tesla Model 3/Y, Ioniq 5, ID.4),
    **96.7%** were answered "unknown" (58 of 60) while 8.3% of known test cars are wrongly flagged. The two misses are
    look-alikes: Mahindra Thar taken for Jeep Wrangler (the Thar is styled on it) and Renault Kwid for Nissan Juke.

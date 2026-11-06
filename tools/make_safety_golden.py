@@ -29,6 +29,8 @@ NAMED = [
     ("flat distribution", {}, 0.1),
     ("just under the warning", {"BMW M3 Coupe 2012": 0.9, "Tesla Model S Sedan 2012": 0.03}, 0.1),
     ("just over the warning", {"BMW M3 Coupe 2012": 0.85, "Tesla Model S Sedan 2012": 0.07}, 0.1),
+    ("brand beats the single top guess", {"BMW 3 Series Sedan 2012": 0.16, "Audi S5 Coupe 2012": 0.14, "Audi S4 Sedan 2012": 0.12,
+                                          "Audi A5 Coupe 2012": 0.11, "Audi S5 Convertible 2012": 0.08, "Audi S4 Sedan 2007": 0.06}, 0.2),
 ]
 
 

@@ -37,7 +37,7 @@ back. Work top to bottom: section 2 is the critical path to a valid submission.
 
 ## 2. Critical path to submission (must do, in order)
 
-### 2.0 Finish the detector fine-tuning (started Fri 22:07, ~40 min)
+### 2.0 Finish the detector fine-tuning (DONE Fri 23:10 - fine-tuned detector shipped; COCO one backed up in `models_run1/`)
 `training/finetune_detector.py` fine-tunes YOLO11s on the Stanford **train** boxes (one class "vehicle"); log:
 `training\finetune_detector_models.log`. When it prints `DONE` there are `models\yolo11s_cars.pt` and `.onnx`.
 1. Back up the current (COCO-pretrained) detector: `copy models\yolo11s.onnx models_run1\yolo11s_coco.onnx`
