@@ -72,6 +72,29 @@ def test_low_make_confidence_is_unknown_even_if_in_distribution():
     assert r["status"] == "unknown"
 
 
+def test_every_high_voltage_class_has_an_official_guide_and_locations():
+    hv = [c for c in CLASSES if c.powertrain != "combustion"]
+    assert len(hv) == 9
+    for c in hv:
+        assert c.guide and c.guide.startswith("https://"), c.label
+        assert c.guide_title and c.battery and c.hv_cables, c.label
+
+
+def test_banner_gives_the_location_of_the_likeliest_high_voltage_car_and_names_it():
+    p = probs(**{"Hyundai Sonata Hybrid Sedan 2012": 0.48, "Hyundai Sonata Sedan 2012": 0.43})
+    s = decide(p, 0.2, CLASSES, T)["safety"]
+    assert s["location_vehicle"] == "Hyundai Sonata Hybrid Sedan 2012"
+    assert "rear seat" in s["battery"] and "Orange" in s["hv_cables"]
+    assert s["guide"]["title"] == "Hyundai Sonata Hybrid emergency response guide"
+
+
+def test_no_location_is_claimed_without_a_high_voltage_warning_or_for_unknown_cars():
+    petrol = decide(probs(**{"BMW M3 Coupe 2012": 0.94}), 0.1, CLASSES, T)["safety"]
+    unknown = decide(probs(**{"Toyota Camry Sedan 2012": 0.93}), 0.9, CLASSES, T)["safety"]
+    for s in (petrol, unknown):
+        assert s["battery"] is None and s["hv_cables"] is None and s["location_vehicle"] is None
+
+
 def test_hierarchy_probabilities_never_increase_with_depth():
     r = decide(probs(**{"Audi S4 Sedan 2012": 0.5, "Audi S4 Sedan 2007": 0.4}), 0.1, CLASSES, T)
     make, family, vehicle = (h["prob"] for h in r["hierarchy"])

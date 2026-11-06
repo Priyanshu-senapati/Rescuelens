@@ -12,7 +12,7 @@ DATA_DIR = Path(os.environ.get("DATA_DIR", Path(__file__).resolve().parents[2] /
 TWO_WORD_MAKES = ("AM General", "Aston Martin", "Land Rover")
 DISCLAIMER = ("Decision-support prototype. Vehicle identification is probabilistic. "
               "Never rely on it alone for cutting, lifting or disabling a vehicle.")
-HV_ACTIONS = ["Do not cut orange high-voltage cables", "Immobilise the vehicle and switch off the ignition",
+HV_ACTIONS = ["Do not cut orange high-voltage cables (blue on some 36 V hybrids)", "Immobilise the vehicle and switch off the ignition",
               "Look for HYBRID / EV badges before cutting", "Confirm the vehicle with VIN or plate"]
 
 
@@ -26,6 +26,12 @@ class CarClass:
     family: str
     powertrain: str          # hybrid | ev | combustion
     guide: str | None
+    guide_title: str | None = None
+    battery: str | None = None
+    hv_cables: str | None = None
+
+
+NO_LOCATION = {"location_vehicle": None, "battery": None, "hv_cables": None}
 
 
 @dataclass(frozen=True)
@@ -45,7 +51,8 @@ def parse_label(label: str, hazards: dict) -> CarClass:
     hz = hazards.get(label, {})
     return CarClass(label=label, make=make, model=" ".join(model_words), year=year, body=words[-2],
                     family=" ".join([make, *family_words]), powertrain=hz.get("powertrain", "combustion"),
-                    guide=hz.get("guide"))
+                    guide=hz.get("guide"), guide_title=hz.get("guide_title"), battery=hz.get("battery"),
+                    hv_cables=hz.get("hv_cables"))
 
 
 def load_classes(names: list[str] | None = None) -> list[CarClass]:
@@ -67,22 +74,26 @@ def _safety(probs: np.ndarray, classes: list[CarClass], unknown: bool, t: Thresh
                 "message": "Vehicle not recognised. Powertrain unknown - treat as possibly high-voltage.",
                 "actions": ["Do not use this prediction for rescue decisions",
                             "Identify the vehicle manually (VIN, plate, badges)",
-                            "Check for HYBRID / EV badges and orange cables"], "guide": None}
+                            "Check for HYBRID / EV badges and orange cables"], "guide": None, **NO_LOCATION}
     hv_idx = [i for i, c in enumerate(classes) if c.powertrain != "combustion"]
     p_hv = float(probs[hv_idx].sum())
     if p_hv < t.hv:
         return {"hv_probability": round(p_hv, 4), "hv_warning": False, "level": "info",
                 "message": "No high-voltage system expected for this vehicle.",
                 "actions": ["Standard airbag and seat-belt pretensioner precautions apply",
-                            "Confirm the vehicle with VIN or plate"], "guide": None}
+                            "Confirm the vehicle with VIN or plate"], "guide": None, **NO_LOCATION}
     top_hv = sorted(hv_idx, key=lambda i: -probs[i])
     with_guide = next((classes[i] for i in top_hv if classes[i].guide), None)
+    likeliest = classes[top_hv[0]]           # only this car's location: another model's layout could mislead
     certain = classes[int(probs.argmax())].powertrain != "combustion" and probs.max() >= t.identify
     message = ("Hybrid / EV identified: HIGH VOLTAGE system present." if certain
                else f"Hybrid possible ({p_hv:.0%}). Treat as HIGH VOLTAGE until verified.")
     return {"hv_probability": round(p_hv, 4), "hv_warning": True, "level": "danger", "message": message,
             "actions": HV_ACTIONS,
-            "guide": {"title": f"{with_guide.label} - Emergency Response Guide", "url": with_guide.guide} if with_guide else None}
+            "guide": {"title": with_guide.guide_title or f"{with_guide.label} - Emergency Response Guide",
+                      "url": with_guide.guide} if with_guide else None,
+            "location_vehicle": likeliest.label if likeliest.battery or likeliest.hv_cables else None,
+            "battery": likeliest.battery, "hv_cables": likeliest.hv_cables}
 
 
 def decide(probs: np.ndarray, unknown_score: float, classes: list[CarClass], t: Thresholds,

@@ -18,6 +18,9 @@ export interface Safety {
   message: string;
   actions: string[];
   guide: { title: string; url: string } | null;
+  location_vehicle?: string | null;
+  battery?: string | null;
+  hv_cables?: string | null;
 }
 
 export interface Quality {
@@ -67,6 +70,7 @@ export interface Result {
   timing_ms: { detect: number; classify: number; classical: number; total: number };
   disclaimer: string;
   mock?: boolean;
+  offline?: boolean;
 }
 
 export interface Metrics {
@@ -82,6 +86,7 @@ export interface Metrics {
     argmax_hv_miss_rate?: number | null;
     known_flagged_unknown_rate?: number | null;
     unknown_catch_rate: number | null;
+    by_threshold?: { threshold: number; hv_miss_rate: number; hv_false_alarm_rate: number }[];
   };
   approaches?: { name: string; top1: number | null; top5: number | null }[];
   localisation?: { deep_mean_iou: number; classical_mean_iou: number | null };

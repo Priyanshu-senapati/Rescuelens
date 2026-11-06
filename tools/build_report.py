@@ -79,7 +79,7 @@ def main() -> None:
         "safety": {"hv_threshold": cfg["hv_threshold"], "hv_miss_rate": chosen["hv_miss_rate"],
                    "hv_false_alarm_rate": chosen["hv_false_alarm_rate"], "argmax_hv_miss_rate": saf["argmax_hv_miss_rate"],
                    "known_flagged_unknown_rate": m["unknown"]["known_test_flagged_rate"],
-                   "unknown_catch_rate": unk.get("unknown_catch_rate")},
+                   "unknown_catch_rate": unk.get("unknown_catch_rate"), "by_threshold": saf["by_threshold"]},
         "approaches": [
             {"name": "classical", "top1": base.get("test_top1"), "top5": base.get("test_top5")},
             {"name": "deep", "top1": c["top1_no_crop"], "top5": None},

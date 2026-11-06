@@ -44,6 +44,9 @@ In development, Vite proxies `/api` to `http://localhost:8000`.
 | `message` | string | banner text |
 | `actions` | `[string]` | short checklist |
 | `guide` | `{title, url}` or `null` | official emergency response guide when we have one |
+| `location_vehicle` | string or `null` | which vehicle `battery` and `hv_cables` describe: the most likely hybrid/EV. The UI must name it, because the answer may be uncertain |
+| `battery` | string or `null` | where the high-voltage battery is, from that vehicle's manufacturer guide (`docs/hazard-sources.md`) |
+| `hv_cables` | string or `null` | how to recognise the high-voltage cables and where they run, from the same guide |
 
 `quality` (all scores 0-100, higher = better):
 `brightness`, `contrast`, `sharpness`, `resolution_px` (shorter side of the car crop), `cut_off` (bool: car touches image edge), `issues` ([string]).
@@ -72,12 +75,18 @@ The evaluation numbers for the dashboard (same numbers as `eval_P5_<TeamID>.md`)
   "efficiency": {"fp32_mb": 0.0, "int8_mb": 0.0, "fp32_ms": 0.0, "int8_ms": 0.0, "int8_top1": 0.0},
   "robustness": [{"condition": "dark", "severity": 1, "top1": 0.0}],
   "calibration": {"ece_before": 0.0, "ece_after": 0.0, "temperature": 1.0},
-  "safety": {"hv_miss_rate": 0.0, "hv_false_alarm_rate": 0.0, "unknown_catch_rate": 0.0},
+  "safety": {"hv_miss_rate": 0.0, "hv_false_alarm_rate": 0.0, "unknown_catch_rate": 0.0, "by_threshold": [{"threshold": 0.05, "hv_miss_rate": 0.0, "hv_false_alarm_rate": 0.0}]},
   "approaches": [{"name": "classical", "top1": 0.0, "top5": 0.0}, {"name": "deep", "top1": 0.0, "top5": 0.0}, {"name": "hybrid", "top1": 0.0, "top5": 0.0}],
   "ablation": [{"variant": "full system", "top1": 0.0}],
   "risk_coverage": [{"coverage": 1.0, "accuracy": 0.0}]
 }
 ```
+
+## `GET /offline/{file}`
+
+Only when the server runs with `OFFLINE_MODELS=1`, because it makes the weights public. Serves `config.json`, `classifier_int8.onnx`,
+`train_emb.npy` and `yolo11s.onnx` from the model folder for on-device mode; anything else is a 404. An answer made on the device has the
+same shape with `offline: true`, `quality`, `features` and `comparison` as `null`, and `steps` empty.
 
 ## `GET /api/health`
 

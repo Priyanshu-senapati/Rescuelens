@@ -75,6 +75,19 @@ def test_too_large_is_413():
     assert r.status_code == 413 and r.json()["error"]["code"] == "too_large"
 
 
+def test_offline_files_are_off_by_default_then_whitelisted(tmp_path, monkeypatch):
+    monkeypatch.setattr("app.main.MODEL_DIR", tmp_path)
+    (tmp_path / "config.json").write_text("{}")
+    (tmp_path / "metrics.json").write_text("{}")
+    assert client.get("/offline/config.json").status_code == 404         # weights stay private unless the team opts in
+
+    monkeypatch.setenv("OFFLINE_MODELS", "1")
+    assert client.get("/offline/config.json").status_code == 200
+    assert client.head("/offline/config.json").status_code == 200
+    for name in ("metrics.json", "..%2Fapp%2Fmain.py", "classifier_int8.onnx"):  # not whitelisted, traversal, missing
+        assert client.get(f"/offline/{name}").status_code == 404
+
+
 def test_valid_photo_returns_a_result():
     r = client.post("/api/analyze", files={"file": ("car.png", png_bytes(), "image/png")})
     assert r.status_code == 200 and r.json()["status"] in {"identified", "ambiguous", "unknown", "no_vehicle"}

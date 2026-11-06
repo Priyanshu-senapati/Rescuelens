@@ -1,12 +1,5 @@
-import type { Result, Safety, Status } from "../types";
-import { Bar, pct } from "./bits";
-
-const STATUS: Record<Status, { title: string; chip: string; note: string }> = {
-  identified: { title: "Identified", chip: "bg-ok", note: "Confident about the exact model and year." },
-  ambiguous: { title: "Not certain", chip: "bg-warn", note: "Sure about part of the answer, not all of it." },
-  unknown: { title: "Not recognised", chip: "bg-unknown", note: "Don't use this answer for rescue decisions." },
-  no_vehicle: { title: "No vehicle found", chip: "bg-ink", note: "Try a photo where the whole vehicle is visible." },
-};
+import type { Result, Safety } from "../types";
+import { Bar, HazardLocation, STATUS, pct } from "./bits";
 
 const LEVEL_NAME = { make: "Brand", family: "Model family", vehicle: "Exact model and year" } as const;
 const DEPTH = { none: 0, make: 1, family: 2, vehicle: 3 } as const;
@@ -38,10 +31,11 @@ function SafetyBanner({ s }: { s: Safety }) {
             </li>
           ))}
         </ul>
+        <HazardLocation s={s} />
         {s.guide && (
           <a href={s.guide.url} target="_blank" rel="noreferrer"
             className="mt-4 inline-flex min-h-11 items-center rounded-md bg-ink px-4 font-semibold text-paper hover:bg-draft">
-            Open the emergency response guide
+            {s.guide.title}
           </a>
         )}
       </div>
@@ -57,6 +51,12 @@ export default function ResultPanel({ result: r }: { result: Result }) {
       {r.mock && (
         <p className="rounded-md border border-dashed border-ink/40 px-3 py-2 text-sm text-ink-soft">
           Sample answer: the trained models aren't loaded on this server yet.
+        </p>
+      )}
+
+      {r.offline && (
+        <p className="rounded-md border border-dashed border-ink/40 px-3 py-2 text-sm text-ink-soft">
+          Answered on this device, without signal. Check it against the server when you're back online.
         </p>
       )}
 

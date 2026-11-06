@@ -31,6 +31,16 @@ export async function prepareImage(file: Blob, name: string): Promise<Prepared> 
   }
 }
 
+/** One JPEG from the live video, small enough to upload every 1.5 s on mobile data. */
+export function captureFrame(video: HTMLVideoElement): Promise<Blob> {
+  const s = Math.min(1, 1280 / Math.max(video.videoWidth, video.videoHeight));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(video.videoWidth * s);
+  canvas.height = Math.round(video.videoHeight * s);
+  canvas.getContext("2d")!.drawImage(video, 0, 0, canvas.width, canvas.height);
+  return canvasToBlob(canvas);
+}
+
 export interface Degrade {
   darkness: number; // 0..0.9
   haze: number; // 0..0.7

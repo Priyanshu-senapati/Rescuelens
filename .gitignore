@@ -32,3 +32,10 @@ training/*.err
 models_*/
 *.log
 training/.yolo_cars/
+
+# browser tests
+frontend/playwright-report/
+frontend/test-results/
+frontend/demo-output/
+!frontend/e2e/stub-models/*.onnx
+!frontend/e2e/stub-models/*.npy

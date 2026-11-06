@@ -1,8 +1,10 @@
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { MAX_BYTES } from "../image";
+import OfflineCard from "./OfflineCard";
 
 interface Props {
   onPick: (file: Blob, name: string) => void;
+  onLive: () => void;
 }
 
 const SAMPLES = [
@@ -11,9 +13,11 @@ const SAMPLES = [
   { file: "night.jpg", label: "Taken at night" },
   { file: "hidden.jpg", label: "Partly hidden" },
   { file: "electric.jpg", label: "Electric car" },
+  { file: "ambiguous-audi-s5.jpg", label: "Look-alike trim: S5 or A5?" },
+  { file: "unknown-tata-nexon.jpg", label: "Indian car outside the 196 models" },
 ];
 
-export default function Uploader({ onPick }: Props) {
+export default function Uploader({ onPick, onLive }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const camera = useRef<HTMLInputElement>(null);
@@ -67,10 +71,23 @@ export default function Uploader({ onPick }: Props) {
         onDrop={onDrop}
         className={`rounded-xl border-2 border-dashed bg-sheet p-6 sm:p-8 ${dragging ? "border-draft bg-draft-soft" : "border-line"}`}
       >
+        <button
+          onClick={onLive}
+          className="mb-3 flex min-h-16 w-full items-center justify-center gap-3 rounded-md bg-ink px-5 text-paper hover:bg-draft"
+        >
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#7cc0ff" strokeWidth="2.4" aria-hidden="true">
+            <path d="M3 9V3h6M19 3h6v6M25 19v6h-6M9 25H3v-6" />
+            <circle cx="14" cy="14" r="4" />
+          </svg>
+          <span className="text-left">
+            <span className="block text-xl font-semibold leading-tight">Point the camera</span>
+            <span className="block text-sm text-paper/75">The answer locks in once it holds steady</span>
+          </span>
+        </button>
         <div className="flex flex-col gap-3 sm:flex-row">
           <button
             onClick={() => camera.current?.click()}
-            className="min-h-12 flex-1 rounded-md bg-ink px-5 text-lg font-semibold text-paper hover:bg-draft"
+            className="min-h-12 flex-1 rounded-md border-2 border-ink px-5 text-lg font-semibold hover:bg-paper"
           >
             Take a photo
           </button>
@@ -89,11 +106,12 @@ export default function Uploader({ onPick }: Props) {
             {error}
           </p>
         )}
+        <OfflineCard />
       </div>
 
       <div className="lg:col-span-2">
         <h2 className="font-display text-2xl font-semibold">No photo to hand? Try one of these</h2>
-        <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
           {SAMPLES.map((s) => (
             <li key={s.file}>
               <button
@@ -106,6 +124,9 @@ export default function Uploader({ onPick }: Props) {
             </li>
           ))}
         </ul>
+        <p className="mt-2 text-sm text-ink-soft">
+          <a href="/samples/CREDITS.md" target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-draft">Photo credits</a>
+        </p>
       </div>
     </section>
   );

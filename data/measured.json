@@ -1,0 +1,23 @@
+{
+  "_note": "Safety numbers the Model report always shows, even before metrics_public.json is deployed. Copied from eval_P5_T50.md section 6 for the shipping model; backend/tests/test_measured.py fails if the two ever differ, so re-copy after regenerating the eval file.",
+  "model": "ConvNeXt-Small",
+  "hv_threshold": 0.05,
+  "hv_thresholds": [
+    {"threshold": 0.05, "hv_miss_rate": 0.0115, "hv_false_alarm_rate": 0.0069},
+    {"threshold": 0.1, "hv_miss_rate": 0.0202, "hv_false_alarm_rate": 0.0038},
+    {"threshold": 0.2, "hv_miss_rate": 0.0288, "hv_false_alarm_rate": 0.003},
+    {"threshold": 0.3, "hv_miss_rate": 0.0375, "hv_false_alarm_rate": 0.0018},
+    {"threshold": 0.5, "hv_miss_rate": 0.0548, "hv_false_alarm_rate": 0.001}
+  ],
+  "argmax_hv_miss_rate": 0.0432,
+  "n_hv_test": 347,
+  "unknown": {
+    "photos": 60,
+    "models": 30,
+    "caught": 58,
+    "catch_rate": 0.9667,
+    "known_flagged_rate": 0.0833,
+    "misses": ["Mahindra Thar taken for Jeep Wrangler", "Renault Kwid taken for Nissan Juke"],
+    "earlier_model": {"name": "ConvNeXt-Tiny", "catch_rate": 0.883}
+  }
+}

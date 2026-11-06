@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, analyze } from "./api";
 import Compare from "./components/Compare";
+import LiveCamera from "./components/LiveCamera";
 import PhotoBox from "./components/PhotoBox";
 import Pipeline from "./components/Pipeline";
 import Report from "./components/Report";
@@ -35,6 +36,7 @@ export default function App() {
   const [view, setView] = useState<View>("identify");
   const [photo, setPhoto] = useState<Prepared | null>(null);
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
+  const [live, setLive] = useState(false);
   const abort = useRef<AbortController | null>(null);
   const pickId = useRef(0); // discards a slow photo decode that finishes after a newer pick or a reset
   const elapsed = useElapsed(phase.kind === "loading");
@@ -75,6 +77,17 @@ export default function App() {
     setPhase({ kind: "idle" });
   }
 
+  function acceptLive(p: Prepared, r: Result) {
+    pickId.current++;
+    abort.current?.abort();
+    swapPhoto(p);
+    setPhase({ kind: "done", result: r });
+    setLive(false);
+    window.scrollTo(0, 0);
+  }
+
+  const closeLive = useCallback(() => setLive(false), []);
+
   const result = phase.kind === "done" ? phase.result : null;
   const stage = STAGES[Math.min(STAGES.length - 1, Math.floor(elapsed / 1.2))];
 
@@ -113,7 +126,7 @@ export default function App() {
         {view === "report" ? (
           <Report />
         ) : !photo ? (
-          <Uploader onPick={pick} />
+          <Uploader onPick={pick} onLive={() => setLive(true)} />
         ) : (
           <>
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
@@ -156,7 +169,7 @@ export default function App() {
             </div>
             {result && result.status !== "no_vehicle" && (
               <div className="mt-10 space-y-10">
-                <Pipeline steps={result.steps} />
+                {result.steps.length > 0 && <Pipeline steps={result.steps} />}
                 <StressTest photo={photo} baseline={result} />
                 {result.comparison && <Compare comparison={result.comparison} />}
               </div>
@@ -164,6 +177,7 @@ export default function App() {
           </>
         )}
       </main>
+      {live && <LiveCamera onClose={closeLive} onUsePhoto={closeLive} onAccept={acceptLive} />}
     </div>
   );
 }
