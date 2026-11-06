@@ -136,12 +136,7 @@ export default function App() {
       <header className="border-b border-line bg-ink text-paper">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 sm:px-6">
           <button onClick={reset} className="flex items-center gap-3 rounded text-left" aria-label="RescueLens, start again">
-            <svg width="36" height="36" viewBox="0 0 32 32" aria-hidden="true">
-              <rect width="32" height="32" rx="6" fill="#26384a" />
-              <path d="M6 20h20l-3.5-7.5H9.5z" fill="none" stroke="#e8651a" strokeWidth="2.4" strokeLinejoin="round" />
-              <circle cx="11" cy="22" r="2.2" fill="#e9edf0" />
-              <circle cx="21" cy="22" r="2.2" fill="#e9edf0" />
-            </svg>
+            <img src="/logo-mark.png" width="48" height="48" alt="" className="rounded-md" />
             <span>
               <span className="block font-display text-2xl font-bold leading-none tracking-wide">RescueLens</span>
               <span className="block text-sm text-paper/70">Vehicle identification for crash response</span>

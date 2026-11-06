@@ -45,23 +45,28 @@ by number plate, VIN, QR code or manual search. At a crash those can be missing,
 ![RescueLens architecture](architecture.png)
 
 ```mermaid
-flowchart LR
-    U[Photo upload or live camera frame<br/>phone or laptop] --> V[Validate + EXIF rotate<br/>+ downscale]
-    V --> D[YOLO11s detector<br/>ONNX, car/bus/truck]
+flowchart TB
+    U[1 to 3 photos of one vehicle<br/>or a live camera frame] --> V[Validate + EXIF rotate<br/>+ downscale]
+    V --> D[YOLO11s detector, ONNX<br/>fine-tuned on Stanford boxes]
     D -- no vehicle --> D2[Retry on CLAHE-enhanced photo]
     D2 -- still none --> NV[status: no_vehicle]
     D --> R[ROI crop<br/>box + 8% margin]
     D2 --> R
     R --> C[Classical CV<br/>CLAHE, Canny, contours,<br/>Hough wheels, colour k-means,<br/>quality scores]
     R --> M[ConvNeXt-Small classifier<br/>ONNX INT8, 196 classes]
+    R -- dark crop --> N[CLAHE copy<br/>second reading, averaged] --> M
+    R --> E[Close-up brand expert<br/>ConvNeXt-Tiny, 9 windows,<br/>49 brands]
     V -. whole photo, for the comparison panel .-> M
     M --> P[Temperature-calibrated<br/>probabilities]
     M --> K[Embedding -> kNN distance<br/>to training cars = unknown score]
+    P --> F[Fuse brand votes<br/>whole^0.8 x close-ups^0.2]
+    E --> F
+    F --> X[Several photos: multiply,<br/>refuse if brands conflict]
     C --> B[Classical baseline<br/>HOG+colour+LBP -> PCA -> LogReg]
-    P --> S[Safety engine]
+    X --> S[Safety engine<br/>brand-first decision,<br/>summed high-voltage risk]
     K --> S
     C -- quality issues --> S
-    S --> O[identified / ambiguous / unknown<br/>+ high-voltage advice]
+    S --> O[identified / ambiguous / unknown<br/>+ high-voltage advice + rescue sheet]
     O --> UI[React UI<br/>live mode locks when 3 frames agree]
     B --> UI
 ```
@@ -224,7 +229,8 @@ with ONNX Runtime Web (WebAssembly). The same answer shape comes back, marked as
 ## 11. Limitations
 
 * Trained on 2012-and-older US-market cars; anything newer is flagged unknown rather than identified.
-* No crashed vehicles in the data; robustness is measured with simulated darkness, haze, blur, low resolution and occlusion.
+* No crashed vehicles in the training data; robustness is measured with simulated darkness, haze, blur, low resolution and occlusion, plus a small test on 48 real crash photos (section 9).
+* Close look-alikes can be identified confidently and wrongly: 5 of 8 new Mahindra Thar photos were called a Jeep Wrangler (section 9).
 * The rescue layer links official guides for the hybrid/EV classes only; it is a prototype, not certified.
 
 ## 12. Ethics and safety

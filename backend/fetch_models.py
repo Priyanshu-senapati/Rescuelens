@@ -8,7 +8,8 @@ import sys
 import urllib.request
 from pathlib import Path
 
-FILES = ["config.json", "classifier_int8.onnx", "train_emb.npy", "yolo11s.onnx", "baseline.npz", "metrics_public.json"]
+FILES = ["config.json", "classifier_int8.onnx", "train_emb.npy", "yolo11s.onnx", "baseline.npz", "metrics_public.json",
+         "brand_parts.json", "brand_parts_int8.onnx"]
 
 base = os.environ.get("MODEL_BASE_URL", "").rstrip("/")
 out = Path(os.environ.get("MODEL_DIR", "models"))
