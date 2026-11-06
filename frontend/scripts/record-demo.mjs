@@ -58,7 +58,9 @@ const sample = async (name) => {
 
 await page.goto(url);
 await caption("Crash scenes hide the plate, VIN and QR code. Hybrids hide high voltage.");
-await wait(14);
+await wait(8);
+await caption("Same shape, different danger: where the official guides put the battery");
+await wait(8);
 
 await caption("A clear photo: RescueLens finds the vehicle and names it");
 await sample(/Clear daylight/);
@@ -81,12 +83,12 @@ await wait(9);
 await page.getByRole("button", { name: "See the full answer" }).click();
 await answer();
 
-const slider = page.getByRole("slider", { name: /Blur/ });
-await slider.scrollIntoViewIfNeeded();
-await caption("Stress test: blur the photo and watch the answer and advice change");
-await wait(3);
-await slider.fill("0.8");
-await wait(12);
+await page.getByRole("heading", { name: "Stress test" }).scrollIntoViewIfNeeded();
+await caption("Automatic sweep: the real model at 8 rising levels of blur");
+await page.getByRole("button", { name: "Sweep blur" }).click();
+await page.getByRole("status").filter({ hasText: /Held|Still/ }).waitFor({ timeout: 90_000 });
+await caption("It says exactly where the answer breaks");
+await wait(8);
 await again();
 
 await caption("A car it has never seen: it says so instead of guessing");

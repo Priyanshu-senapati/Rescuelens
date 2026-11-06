@@ -117,7 +117,7 @@ and update the "Run it" section of the README. (Decide as a team; it makes the m
 2. (0:20-0:50) Clear sample -> identified, box, pipeline steps.
 3. (0:50-1:20) "Hybrid that looks like a petrol car": classical-only says Sonata (petrol), RescueLens says Sonata **Hybrid**
    + high-voltage banner + official guide.
-4. (1:20-1:50) Stress test: slide blur/hidden until the status flips to "Not certain" and the advice changes.
+4. (1:20-1:50) Stress test: press "Sweep occlusion" or "Sweep blur" and let the curve show where the answer breaks.
 5. (1:50-2:20) Judge's own photo (likely an Indian car) -> "Not recognised, treat as possibly high-voltage".
 6. (2:20-2:50) Model report: 94.55% top-1, crop +2.9 points, INT8 3.5x smaller, 1.15% missed hybrids, 58 of 60 unknown cars caught.
    Live camera goes into step 4 if the phone and venue connection allow it (see `docs/field-kit.md` section 5).
@@ -176,7 +176,7 @@ Rules: never evaluate on the test split while choosing settings (use val); keep 
 ### Product features (beyond the rubric)
 8. **Offline on-device mode.** Run the INT8 classifier + YOLO in the browser with onnxruntime-web (WebGPU/WASM) as an
    installable PWA: rural crash sites often have no signal. Biggest "real product" upgrade.
-9. **Rescue-sheet overlay.** For models with an official sheet, draw the hazard zones (battery, HV cables, airbags) roughly
+9. **Rescue-sheet overlay** (a side-view schematic is done, `RescueSheet.tsx`; aligning it to the photo is not). For models with an official sheet, draw the hazard zones (battery, HV cables, airbags) roughly
    aligned to the detected box; mark clearly as approximate.
 10. **Live camera mode.** Classify video frames and lock the answer once confidence is stable over several frames.
 11. **Multiple vehicles.** Classify every detected vehicle (currently only the main one; others are drawn faint).

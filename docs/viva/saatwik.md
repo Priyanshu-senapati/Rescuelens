@@ -9,6 +9,8 @@
 | How does the lock work? | One frame every 1.5 s, one request at a time. 3 agreeing frames in a row lock it. For an unknown car the closest match is ignored; for an ambiguous one only the level it is sure of counts. |
 | How is live mode kept safe? | The high-voltage state is part of what must agree, so a flickering warning can never lock as safe. A warning shows on the first frame that raises it and stays for 3 frames. |
 | Is the edge overlay real? | Yes. Sobel plus non-maximum suppression (the core of Canny) runs in the browser about 12 times a second, brightest inside the detector box. It is visual feedback; the answer comes from the server. |
+| What is the automatic sweep? | It re-renders the photo at 8 rising levels of one condition, sends each to the real model and plots usable confidence, marking the first level where the answer changes. Real calls, nothing precomputed. |
+| Is the rescue sheet accurate? | It marks the region the manufacturer's guide describes on a generic body shape. Not to scale, and the app says it isn't a guide for where to cut. |
 | What if something breaks? | An error boundary shows "Start again" plus safe advice. Blocked camera and lost server each have their own message. Browser tests cover these and run on every push. |
 
 **Your failure case:** Mahindra Thar answered as Jeep Wrangler: it is styled on the Wrangler, so the unknown check can miss close look-alikes.
