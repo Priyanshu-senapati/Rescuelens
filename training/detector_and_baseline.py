@@ -57,12 +57,20 @@ def mat_rows(path):
 def box(r):
     return tuple(float(r[k]) for k in ("bbox_x1", "bbox_y1", "bbox_x2", "bbox_y2"))
 
+def split_of(p):
+    """Nearest parent folder naming car_ims / test / train (ignores Kaggle's owner/slug prefix)."""
+    for part in reversed(p.relative_to(IN).parts[:-1]):
+        s = part.lower()
+        if "car_ims" in s: return "car_ims"
+        if "test" in s: return "test"
+        if "train" in s: return "train"
+    return None
+
 train_imgs, test_imgs, carims = {}, {}, {}
 for p in IN.rglob("*.jpg"):
-    inner = "/".join(p.relative_to(IN).parts[1:-1]).lower()
-    if "car_ims" in inner: carims[p.name] = p
-    elif "test" in inner: test_imgs[p.name] = p
-    elif "train" in inner: train_imgs[p.name] = p
+    target = {"car_ims": carims, "test": test_imgs, "train": train_imgs}.get(split_of(p))
+    if target is not None:
+        target[p.name] = p
 
 tr_mat, te_mat, full_mat = find("cars_train_annos.mat"), find("cars_test_annos_withlabels*.mat"), find("cars_annos.mat")
 train_items, test_items = [], []

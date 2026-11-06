@@ -79,15 +79,20 @@ else:
 assert len(CLASS_NAMES) == 196, f"expected 196 class names, got {len(CLASS_NAMES)}"
 
 # index every jpg by (split folder, file name); train and test both use names like 00001.jpg
+def split_of(p):
+    """Nearest parent folder naming car_ims / test / train (ignores Kaggle's owner/slug prefix)."""
+    for part in reversed(p.relative_to(IN).parts[:-1]):
+        s = part.lower()
+        if "car_ims" in s: return "car_ims"
+        if "test" in s: return "test"
+        if "train" in s: return "train"
+    return None
+
 train_imgs, test_imgs, carims = {}, {}, {}
 for p in IN.rglob("*.jpg"):
-    inner = "/".join(p.relative_to(IN).parts[1:-1]).lower()   # folders inside the dataset, slug excluded
-    if "car_ims" in inner:
-        carims[p.name] = p
-    elif "test" in inner:
-        test_imgs[p.name] = p
-    elif "train" in inner:
-        train_imgs[p.name] = p
+    target = {"car_ims": carims, "test": test_imgs, "train": train_imgs}.get(split_of(p))
+    if target is not None:
+        target[p.name] = p
 
 tr_mat, te_mat, full_mat = find("cars_train_annos.mat"), find("cars_test_annos_withlabels*.mat"), find("cars_annos.mat")
 train_items, test_items = [], []          # (image path, box, label 0-195)
@@ -393,21 +398,33 @@ except TypeError:
 # MatMul/Gemm only: ConvNeXt's heavy layers are Linear; quantizing Conv needs ConvInteger, which ORT CPU lacks for int8 weights
 quantize_dynamic(str(fp32_path), str(int8_path), weight_type=QuantType.QInt8, op_types_to_quantize=["MatMul", "Gemm"])
 
-def ort_eval(path, n):
+def ort_eval(path, paths, labels):
+    """Accuracy, CPU ms/image and embeddings from an ONNX model, exactly as the app will run it."""
     so = ort.SessionOptions(); so.intra_op_num_threads = 2          # match the 2-vCPU deployment box
     sess = ort.InferenceSession(str(path), so, providers=["CPUExecutionProvider"])
-    xs = [eval_tf(Image.open(te_paths[i]).convert("RGB")).unsqueeze(0).numpy() for i in range(n)]
+    xs = [eval_tf(Image.open(p).convert("RGB")).unsqueeze(0).numpy() for p in paths]
     for x in xs[:3]: sess.run(None, {"input": x})                     # warm-up
-    t0 = time.time(); preds = [int(sess.run(None, {"input": x})[0].argmax()) for x in xs]; ms = (time.time() - t0) / n * 1000
-    return float(np.mean(np.array(preds) == np.array(te_labels[:n]))), ms
+    t0 = time.time(); outs = [sess.run(None, {"input": x}) for x in xs]; ms = (time.time() - t0) / len(xs) * 1000
+    preds = np.array([int(o[0].argmax()) for o in outs])
+    return float(np.mean(preds == np.array(labels))), ms, np.stack([o[1][0] for o in outs]).astype(np.float32)
 
-fp32_acc, fp32_ms = ort_eval(fp32_path, ONNX_EVAL_N)
-int8_acc, int8_ms = ort_eval(int8_path, ONNX_EVAL_N)
+n = ONNX_EVAL_N
+fp32_acc, fp32_ms, fp32_te_emb = ort_eval(fp32_path, te_paths[:n], te_labels[:n])
+int8_acc, int8_ms, int8_te_emb = ort_eval(int8_path, te_paths[:n], te_labels[:n])
+USE_INT8 = int8_acc >= fp32_acc - 0.01            # only ship INT8 if it costs < 1 point
+deploy_path, deploy_te_emb = (int8_path, int8_te_emb) if USE_INT8 else (fp32_path, fp32_te_emb)
 M["efficiency"] = {"params_m": sum(p.numel() for p in model.parameters()) / 1e6,
                    "fp32_mb": fp32_path.stat().st_size / 2**20, "int8_mb": int8_path.stat().st_size / 2**20,
                    "fp32_ms_cpu2": fp32_ms, "int8_ms_cpu2": int8_ms, "fp32_top1_subset": fp32_acc, "int8_top1_subset": int8_acc,
-                   "subset_n": ONNX_EVAL_N}
-print(json.dumps(M["efficiency"], indent=1))
+                   "subset_n": n, "deployed": "int8" if USE_INT8 else "fp32"}
+
+# re-set the unknown-car threshold with the ONNX model the app actually runs (quantization shifts embeddings)
+calib_n = min(len(va_paths), 40 if QUICK else 400)
+_, _, va_emb_deploy = ort_eval(deploy_path, va_paths[:calib_n], va_labels[:calib_n])
+UNKNOWN_THRESHOLD = float(np.percentile(unknown_score(va_emb_deploy), 95))
+M["unknown"].update(threshold=UNKNOWN_THRESHOLD, calibrated_on=M["efficiency"]["deployed"], calib_n=calib_n,
+                    known_test_flagged_rate=float((unknown_score(deploy_te_emb) > UNKNOWN_THRESHOLD).mean()))
+print(json.dumps({"efficiency": M["efficiency"], "unknown": M["unknown"]}, indent=1))
 
 # %% [markdown]
 # ## Save everything the back end and the eval file need
@@ -420,7 +437,7 @@ np.savez_compressed(EXPORT / "logits.npz", val_logits=va_logits, val_labels=va_l
 (EXPORT / "config.json").write_text(json.dumps({
     "model_name": MODEL_NAME, "img": IMG, "mean": MEAN, "std": STD, "class_names": CLASS_NAMES,
     "temperature": TEMP, "knn_k": KNN_K, "unknown_threshold": UNKNOWN_THRESHOLD, "hv_threshold": 0.1,
-    "quick": QUICK}, indent=1))
+    "use_int8": USE_INT8, "quick": QUICK}, indent=1))
 (EXPORT / "metrics.json").write_text(json.dumps(M, indent=1))
 for f in sorted(EXPORT.iterdir()):
     print(f"{f.name:28s} {f.stat().st_size / 2**20:8.1f} MB")

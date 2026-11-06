@@ -7,6 +7,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import onnxruntime as ort
+from PIL import Image
 
 from . import classical
 
@@ -38,7 +39,7 @@ class Detector:
         pad_y, pad_x = (self.size - nh) // 2, (self.size - nw) // 2
         canvas = np.full((self.size, self.size, 3), 114, np.uint8)
         canvas[pad_y:pad_y + nh, pad_x:pad_x + nw] = cv2.resize(rgb, (nw, nh), interpolation=cv2.INTER_LINEAR)
-        x = canvas.transpose(2, 0, 1)[None].astype(np.float32) / 255
+        x = np.ascontiguousarray(canvas.transpose(2, 0, 1)[None], dtype=np.float32) / 255
         out = self.session.run(None, {self.session.get_inputs()[0].name: x})[0][0]      # 84 x 8400
         scores = out[[4 + c for c in VEHICLE_CLASSES]].max(0)
         keep = scores > self.conf
@@ -52,7 +53,11 @@ class Detector:
         found = []
         for i in np.array(idx).ravel():
             bx, by, bw_, bh_ = boxes[i]
-            found.append(((int(max(0, bx)), int(max(0, by)), int(min(w, bx + bw_)), int(min(h, by + bh_))), float(scores[i])))
+            b = (int(max(0, bx)), int(max(0, by)), int(min(w, bx + bw_)), int(min(h, by + bh_)))
+            if b[2] - b[0] >= 16 and b[3] - b[1] >= 16:      # drop slivers (e.g. boxes in the letterbox padding)
+                found.append((b, float(scores[i])))
+        if not found:
+            return []
         # main vehicle = biggest of the confident boxes; the rest follow
         area = lambda f: (f[0][2] - f[0][0]) * (f[0][3] - f[0][1])
         main = max([f for f in found if f[1] >= 0.4] or found, key=area)
@@ -67,15 +72,16 @@ class Classifier:
         self.unknown_threshold, self.hv_threshold = cfg["unknown_threshold"], cfg.get("hv_threshold", 0.1)
         self.mean, self.std = np.array(cfg["mean"], np.float32), np.array(cfg["std"], np.float32)
         int8 = model_dir / "classifier_int8.onnx"
-        self.precision = "int8" if int8.exists() else "fp32"
-        self.session = _session(int8 if int8.exists() else model_dir / "classifier_fp32.onnx")
+        use_int8 = cfg.get("use_int8", True) and int8.exists()     # notebook sets use_int8 = False if INT8 lost > 1 point
+        self.precision = "int8" if use_int8 else "fp32"
+        self.session = _session(int8 if use_int8 else model_dir / "classifier_fp32.onnx")
         self.bank = np.load(model_dir / "train_emb.npy").astype(np.float32)          # L2-normalised train embeddings
 
     def __call__(self, car: np.ndarray) -> tuple[np.ndarray, float]:
         """Returns (calibrated class probabilities, unknown-car score)."""
-        interp = cv2.INTER_AREA if min(car.shape[:2]) > self.size else cv2.INTER_LINEAR
-        x = cv2.resize(car, (self.size, self.size), interpolation=interp).astype(np.float32) / 255
-        x = ((x - self.mean) / self.std).transpose(2, 0, 1)[None].astype(np.float32)
+        # same resize as training (torchvision Resize on a PIL image = PIL bilinear with antialiasing)
+        x = np.asarray(Image.fromarray(car).resize((self.size, self.size), Image.BILINEAR), dtype=np.float32) / 255
+        x = np.ascontiguousarray(((x - self.mean) / self.std).transpose(2, 0, 1)[None], dtype=np.float32)
         logits, emb = self.session.run(None, {"input": x})
         e = emb[0] / max(1e-8, float(np.linalg.norm(emb[0])))
         sims = np.sort(self.bank @ e)[-self.k:]

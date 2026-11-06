@@ -55,7 +55,7 @@ def create_app() -> FastAPI:
     try:
         engine = load_engine(MODEL_DIR)
         log.info("models loaded from %s (%s)", MODEL_DIR, engine.classifier.precision)
-    except (FileNotFoundError, KeyError, ImportError) as exc:
+    except Exception as exc:                 # missing / corrupt model files must not take the site down
         engine = None
         log.warning("models not available (%s) - serving fixture responses (mock mode)", exc)
     mocks = itertools.cycle([json.loads((FIXTURES / f"{n}.json").read_text(encoding="utf-8"))
