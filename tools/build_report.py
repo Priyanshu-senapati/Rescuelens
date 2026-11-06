@@ -65,6 +65,8 @@ def main() -> None:
     at = {r["threshold"]: r for r in saf["by_threshold"]}
     chosen = at.get(cfg["hv_threshold"], saf["by_threshold"][1])
     rob = {(r["condition"], r["severity"]): r["top1"] for r in m["robustness"]}
+    unk_path = a.out / "unknown_eval.json"           # from tools/eval_unknown.py, if it was run
+    unk = json.loads(unk_path.read_text()) if unk_path.exists() else {}
 
     public = {
         "classification": {"top1": c["top1"], "top5": c["top5"], "top1_no_crop": c["top1_no_crop"], "top1_tta": c["top1_tta"]},
@@ -75,7 +77,8 @@ def main() -> None:
         "calibration": {"ece_before": cal["ece_before"], "ece_after": cal["ece_after"], "temperature": cal["temperature"]},
         "safety": {"hv_threshold": cfg["hv_threshold"], "hv_miss_rate": chosen["hv_miss_rate"],
                    "hv_false_alarm_rate": chosen["hv_false_alarm_rate"], "argmax_hv_miss_rate": saf["argmax_hv_miss_rate"],
-                   "known_flagged_unknown_rate": m["unknown"]["known_test_flagged_rate"], "unknown_catch_rate": None},
+                   "known_flagged_unknown_rate": m["unknown"]["known_test_flagged_rate"],
+                   "unknown_catch_rate": unk.get("unknown_catch_rate")},
         "approaches": [
             {"name": "classical", "top1": base.get("test_top1"), "top5": base.get("test_top5")},
             {"name": "deep", "top1": c["top1_no_crop"], "top5": None},
@@ -138,7 +141,9 @@ def main() -> None:
         "| Threshold | HV miss rate | False alarm rate |", "|---|---|---|",
         *[f"| {r['threshold']} | {pct(r['hv_miss_rate'])} | {pct(r['hv_false_alarm_rate'])} |" for r in saf["by_threshold"]],
         f"Plain top-1 (argmax) would miss {pct(saf['argmax_hv_miss_rate'])} of hybrid/EV test cars ({saf['n_hv_test']} images).",
-        f"Unknown-car check: {pct(m['unknown']['known_test_flagged_rate'])} of known test cars wrongly flagged unknown.",
+        f"Unknown-car check: {pct(m['unknown']['known_test_flagged_rate'])} of known test cars wrongly flagged unknown; "
+        f"{pct(unk.get('unknown_catch_rate'))} of {unk.get('n_vehicle_found', 0)} photos of cars outside the 196 classes "
+        "(Indian / post-2012 models) correctly answered 'unknown'.",
         "",
         "## Approach comparison (classical vs deep learning vs hybrid)",
         "| Approach | What it is | Top-1 | Top-5 |", "|---|---|---|---|",

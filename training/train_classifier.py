@@ -159,7 +159,8 @@ def main():
     scaler = torch.amp.GradScaler("cuda")
     crit = torch.nn.CrossEntropyLoss(label_smoothing=LABEL_SMOOTHING)
     best, history, t_start = -1.0, [], time.time()
-    for ep in range(EPOCHS):
+    eval_only = os.environ.get("EVAL_ONLY") == "1" and (EXPORT / "best.pt").exists()   # re-run evaluation without retraining
+    for ep in range(0 if eval_only else EPOCHS):
         model.train()
         t_ep, run_loss = time.time(), 0.0
         for x, y in dl_tr:
@@ -183,6 +184,8 @@ def main():
             print("time budget reached - stopping early with the best epoch so far", flush=True)
             break
     model.load_state_dict(torch.load(EXPORT / "best.pt", map_location=dev, weights_only=True))
+    if eval_only:
+        best = topk(predict(dl_va)[0], va_labels, 1)
     print(f"best val top-1 {best:.4f}", flush=True)
 
     # ---- test accuracy, crop vs no-crop, flip TTA

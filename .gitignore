@@ -26,3 +26,5 @@ private_photos/
 # training artefacts
 .cache/
 runs/
+training/.quick/
+training/*.log
