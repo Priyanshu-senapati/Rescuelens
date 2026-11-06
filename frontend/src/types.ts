@@ -18,6 +18,9 @@ export interface Safety {
   message: string;
   actions: string[];
   guide: { title: string; url: string } | null;
+  location_vehicle?: string | null;
+  battery?: string | null;
+  hv_cables?: string | null;
 }
 
 export interface Quality {
