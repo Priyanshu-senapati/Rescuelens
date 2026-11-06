@@ -31,3 +31,7 @@ training/*.log
 training/*.err
 models_*/
 *.log
+
+# browser tests
+frontend/playwright-report/
+frontend/test-results/
