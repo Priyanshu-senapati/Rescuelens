@@ -6,7 +6,7 @@ type Comparison = NonNullable<Result["comparison"]>;
 const COLUMNS: { key: keyof Comparison; title: string; how: string }[] = [
   { key: "classical", title: "Classical only", how: "Hand-crafted shape (HOG), colour and texture features with a linear classifier. No neural network." },
   { key: "deep", title: "Deep learning only", how: "The ConvNeXt network on the whole photo, without locating the vehicle first." },
-  { key: "hybrid", title: "Hybrid (what you see above)", how: "Detector crop, contrast boost when dark, calibrated network, then the safety rules." },
+  { key: "hybrid", title: "Hybrid (RescueLens)", how: "Detector crop, calibrated network and unknown-car check, then the safety rules." },
 ];
 
 export default function Compare({ comparison }: { comparison: Comparison }) {

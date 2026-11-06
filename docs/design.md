@@ -39,9 +39,8 @@ flowchart LR
     D --> R[ROI crop<br/>box + 8% margin]
     D2 --> R
     R --> C[Classical CV<br/>CLAHE, Canny, contours,<br/>Hough wheels, colour k-means,<br/>quality scores]
-    R --> G{Dark?<br/>brightness < 30}
-    G -- yes --> E[CLAHE enhance] --> M
-    G -- no --> M[ConvNeXt-Tiny classifier<br/>ONNX INT8, 196 classes]
+    R --> M[ConvNeXt-Tiny classifier<br/>ONNX INT8, 196 classes]
+    V -. whole photo, for the comparison panel .-> M
     M --> P[Temperature-calibrated<br/>probabilities]
     M --> K[Embedding -> kNN distance<br/>to training cars = unknown score]
     C --> B[Classical baseline<br/>HOG+colour+LBP -> PCA -> LogReg]

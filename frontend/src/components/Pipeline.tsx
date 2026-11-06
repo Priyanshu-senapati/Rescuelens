@@ -27,7 +27,7 @@ export default function Pipeline({ steps }: { steps: Step[] }) {
         {original && enhanced && (
           <div>
             <h3 className="font-display text-2xl font-semibold">Before and after contrast boost</h3>
-            <p className="mb-3 text-ink-soft">Drag to compare. Dark photos are boosted before the network sees them.</p>
+            <p className="mb-3 text-ink-soft">Drag to compare. The boost reveals detail for people and is used to retry detection in dark photos.</p>
             <div className="relative overflow-hidden rounded-lg border border-line">
               <img src={enhanced.image} alt="Photo after contrast boost" className="block w-full" />
               <img src={original.image} alt="Photo before contrast boost" className="absolute inset-0 block h-full w-full"

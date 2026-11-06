@@ -27,7 +27,7 @@ function SafetyBanner({ s }: { s: Safety }) {
       {danger && <div className="hazard-stripes w-3 shrink-0 sm:w-4" aria-hidden="true" />}
       <div className="p-4 sm:p-5">
         <p className={`font-display text-3xl font-bold leading-none ${danger ? "text-hv" : "text-warn"}`}>
-          {danger ? "High voltage possible" : "Powertrain unknown"}
+          {danger ? "High voltage" : "Powertrain unknown"}
         </p>
         <p className="mt-2 text-lg font-medium">{s.message}</p>
         <ul className="mt-3 space-y-1.5">
