@@ -46,6 +46,7 @@ RescueLens identifies a vehicle from how it looks, across 196 make, model and ye
 - **Warnings never wait.** A high-voltage warning shows on the first frame that raises it, and a car flickering between "warning" and "no warning" can never lock as safe.
 - **Summed-probability safety rule.** No single hybrid has to win. If all 9 hybrid/EV classes together reach 5%, the warning fires.
 - **A rescue sheet that draws itself.** A technical drawing marks where the battery sits and how the cables run, read from manufacturer guides for all 9 models, with [every source and caveat listed](docs/hazard-sources.md).
+- **Two experts on the brand.** A second network votes on badge, grille and lights from zoomed windows, and the summed brand evidence can overrule a lone top guess. Dark photos also get a second reading from a contrast-boosted copy.
 - **Unknown-car detection.** Softmax confidence can stay high on cars it has never seen, so it also measures distance to the training cars.
 - **Automatic stress sweep.** One button runs your photo through the real model at 8 rising levels of darkness, smoke, blur or occlusion, plots the confidence curve live and says exactly where the answer broke.
 - **It shows its working.** While the model runs, the photo dims into a blueprint of its real edge map. When the answer lands, the drawing snaps onto the detected vehicle.
@@ -53,20 +54,20 @@ RescueLens identifies a vehicle from how it looks, across 196 make, model and ye
 - **Works without signal (opt-in).** An installable app can run the models on the device, under the same safety rules, pinned to the server by a shared test file.
 - **Fails safely.** A crash shows safe advice and a "Start again" button, never a blank page.
 
-![The automatic stress sweep on the real model: the answer holds as blur rises, then the curve drops and the app says where it changed](docs/img/stress-sweep.png)
+![The automatic stress sweep on the real model: the answer holds as occlusion rises, then the curve drops and the app says where it changed](docs/img/stress-sweep.png)
 
 ## Try these on the live app
 
-Answers from the real deployed model, 6 Nov 2026.
+Answers from the real deployed model, 7 Nov 2026.
 
 | Sample | Answer | Why it's worth showing |
 |---|---|---|
-| Clear daylight photo | **Identified:** BMW M3 Coupe 2012, 98% | The easy case, with the full pipeline on show |
+| Clear daylight photo | **Identified:** BMW M3 Coupe 2012, 99% | The easy case, with the full pipeline on show |
 | Hybrid that looks like a petrol car | **Identified:** Hyundai Sonata Hybrid 2012, 99%, high voltage | The whole pitch in one photo |
-| Taken at night | **Identified:** Audi S4 Sedan 2012, 84% | Darkness barely hurts accuracy |
-| Partly hidden | **Identified:** Chevrolet Tahoe Hybrid 2012, 64%, high voltage | Still finds the hybrid with part of it covered |
+| Taken at night | **Identified:** Audi S4 Sedan 2012, 90% | Darkness barely hurts accuracy |
+| Partly hidden | **Identified:** Chevrolet Tahoe Hybrid 2012, 69%, high voltage | Still finds the hybrid with part of it covered |
 | Hybrid or not? Rear hidden | **Not certain:** Chevrolet Silverado family, hybrid can't be ruled out | Uncertainty changes the advice |
-| Electric car | **Identified:** Tesla Model S 2012, 98%, high voltage | Finds the EV and warns about it |
+| Electric car | **Identified:** Tesla Model S 2012, 99%, high voltage | Finds the EV and warns about it |
 | Look-alike trim: S5 or A5? | **Not certain:** Audi, model uncertain | Its most frequent mix-up, and it says so |
 | Indian car outside the 196 models | **Not recognised** | Refuses to guess at a Tata Nexon |
 
@@ -81,6 +82,8 @@ Official Stanford Cars test split: 8,041 images, never used for training or tuni
 | **Classical vs deep vs hybrid** | 13.7% vs 91.7% vs **94.6%** top-1 |
 | **Missed hybrids and EVs** | **1.15%** with the summed rule vs 4.32% trusting the top answer, with 0.69% false alarms |
 | **Unseen car models** (30 models, 60 photos) | **96.7%** answered "unknown"; 8.3% of known cars wrongly flagged |
+| **Brand accuracy** (49 brands) | **98.61%**, and **92.05%** with 30% of the vehicle hidden |
+| **Real crash photos** (48) | Declined to identify **44**; of 3 confident answers, 1 was wrong |
 | **Calibration** | ECE 0.098 -> **0.011** after temperature scaling |
 | **Model size / CPU latency** | 189.4 MB -> **54.3 MB** INT8, 739 ms -> **302 ms** on 2 threads, no accuracy loss on a 300-image check |
 
@@ -152,7 +155,8 @@ CI runs both on every push. Check the demo samples against the real models with 
 ## What it can't do
 
 - It was trained on **US-market cars up to 2012**, so most cars on Indian roads today will be answered "unknown", on purpose. It doesn't recognise them.
-- There are **no crashed vehicles in the data**. Robustness is measured with simulated darkness, haze, blur, low resolution and occlusion.
+- There are **no crashed vehicles in the training data**. On 48 real crash photos it got the brand right only 23% of the time, and mostly declined to answer, which is what it should do.
+- **Close look-alikes can still fool it.** On 8 new photos of a Mahindra Thar, 5 were confidently called a Jeep Wrangler, with no high-voltage warning. That's why the app always says to confirm with VIN or plate.
 - **Weak spots:** severe blur (40% top-1), very low resolution (53%) and heavy occlusion (66%).
 - **Offline mode has not been measured** with the real models on a phone.
 - **No responder has reviewed the high-voltage text yet.**

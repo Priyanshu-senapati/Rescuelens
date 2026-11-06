@@ -81,12 +81,9 @@ cd frontend && npx playwright install chromium && npm run demo:record -- https:/
 It follows the 3-minute script in `docs/BUILD_PLAN.md` section 2.5 and saves a captioned `.webm` in `frontend/demo-output/`. Watch all of
 it before trusting it, then keep a copy on two laptops and a phone. If the venue Wi-Fi fails, this is the demo.
 
-Also take the 3 failure-case screenshots for the design doc from the live app: an "ambiguous" stress test, Thar -> Wrangler and a
-heavy blur.
-
 ## 5. Before the demo
 
-All 8 samples were run through the real model on the live URL on 6 Nov 2026, after the fine-tuned detector shipped, and answer as the README lists. If the model changes, check them again:
+All 8 samples were run through the real model on the live URL on 7 Nov 2026, with the fine-tuned detector and brand expert, and answer as the README lists. If the model changes, check them again:
 
 ```bash
 python tools/check_samples.py
@@ -96,7 +93,9 @@ If a sample doesn't give its expected answer, swap the photo instead of changing
 
 **Redeploy after merging any UI work.** The live site only shows what was deployed.
 
-Then check the live camera on a real phone on the live https URL. It has only run against the real model with a simulated camera feed.
+Then check the live camera on a real phone on the live https URL. It has run on the live site, but only with a simulated camera feed. A lock takes about 5 s.
+
+**Practise the look-alike answer.** A Mahindra Thar can come back as a confident Jeep Wrangler with no warning (5 of 8 new photos). Don't try to hide it: say the app's advice is to confirm with VIN or plate, and name it as the top thing to fix next.
 
 ## 6. Decide on offline mode (team decision)
 

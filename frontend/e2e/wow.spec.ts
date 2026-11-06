@@ -24,11 +24,11 @@ const point = (level: number, status: SweepPoint["status"], key: string, hv = fa
 test("the sweep names the exact point the answer changed", () => {
   const steady = [point(0, "identified", "a"), point(0.5, "identified", "a"), point(1, "identified", "a")];
   expect(firstChange(steady)).toBe(-1);
-  expect(sweepSummary(steady, "blur")).toContain("even at 100% blur");
+  expect(sweepSummary(steady, "blur")).toContain("even at 100% on the blur slider");
 
   const flips = [point(0, "identified", "a"), point(0.25, "identified", "a"), point(0.5, "ambiguous", "b", true)];
   expect(firstChange(flips)).toBe(2);
-  expect(sweepSummary(flips, "blur")).toBe('Held "Identified" up to 25% blur. At 50% the answer changed to "Not certain", and the high-voltage warning came on.');
+  expect(sweepSummary(flips, "blur")).toBe('Held "Identified" up to 25% on the blur slider. At 50% the answer changed to "Not certain", and the high-voltage warning came on.');
 });
 
 test("the home page cycles the rescue sheet and can be paused or driven by hand", async ({ page }) => {
