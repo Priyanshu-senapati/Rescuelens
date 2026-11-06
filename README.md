@@ -73,7 +73,7 @@ Official Stanford Cars test split: 8,041 images, never used for training or tuni
 | | |
 |---|---|
 | **Top-1 / top-5 accuracy** | **94.55% / 99.27%** (ConvNeXt-Small, 384 px, detector crop) |
-| **Finding the vehicle** (YOLO11s) | mean IoU **0.886**, mAP@0.5 **0.892**, mAP@0.5:0.95 0.825 |
+| **Finding the vehicle** (YOLO11s fine-tuned on Stanford train boxes) | mean IoU **0.954**, mAP@0.5 **0.999**, mAP@0.5:0.95 **0.941** (COCO-pretrained: 0.886 / 0.892 / 0.825) |
 | **Classical vs deep vs hybrid** | 13.7% vs 91.7% vs **94.6%** top-1 |
 | **Missed hybrids and EVs** | **1.15%** with the summed rule vs 4.32% trusting the top answer, with 0.69% false alarms |
 | **Unseen car models** (30 models, 60 photos) | **96.7%** answered "unknown"; 8.3% of known cars wrongly flagged |

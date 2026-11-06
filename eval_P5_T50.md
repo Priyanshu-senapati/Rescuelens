@@ -14,22 +14,24 @@ Test set: official Stanford Cars test split (8041 images, never used for trainin
 ## 2. Object localization (IoU)
 | Method | Mean IoU | IoU >= 0.5 |
 |---|---|---|
-| YOLO11s (deep) | 0.886 | 92.81% |
+| yolo11s (fine-tuned on Stanford Cars train boxes) | 0.954 | 99.85% |
+| yolo11s (COCO pretrained, car/bus/truck) | 0.886 | 92.81% |
 | Largest edge contour (classical) | 0.639 | 76.20% |
 (n = 8041 / 2000 random test images)
 
 ## 3. Object detection (mAP)
 | Metric | Value |
 |---|---|
-| mAP@0.5 | 0.892 |
-| mAP@0.5:0.95 | 0.825 |
+| mAP@0.5 | 0.999 |
+| mAP@0.5:0.95 | 0.941 |
+| mAP@0.5 / @0.5:0.95 before fine-tuning (COCO-pretrained) | 0.892 / 0.825 |
 
 ## 4. Model efficiency
 | Model | Size | CPU latency (2 threads) | Top-1 (subset) |
 |---|---|---|---|
 | Classifier FP32 (ONNX) | 189.4 MB | 739 ms | 93.67% |
 | Classifier INT8 (dynamic quantization) | 54.3 MB | 302 ms | 93.67% |
-| YOLO11s detector | - | 39 ms (0) | - |
+| YOLO11s detector | - | 26 ms (0) | - |
 Parameters: 49.6 M. Subset = first 300 test images.
 
 ## 5. Robustness (top-1 under degraded conditions)

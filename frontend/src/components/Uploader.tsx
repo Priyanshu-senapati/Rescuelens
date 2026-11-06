@@ -12,6 +12,7 @@ const SAMPLES = [
   { file: "sonata-hybrid.jpg", label: "Hybrid that looks like a petrol car" },
   { file: "night.jpg", label: "Taken at night" },
   { file: "hidden.jpg", label: "Partly hidden" },
+  { file: "ambiguous.jpg", label: "Hybrid or not? Rear hidden" },
   { file: "electric.jpg", label: "Electric car" },
   { file: "ambiguous-audi-s5.jpg", label: "Look-alike trim: S5 or A5?" },
   { file: "unknown-tata-nexon.jpg", label: "Indian car outside the 196 models" },
@@ -111,7 +112,7 @@ export default function Uploader({ onPick, onLive }: Props) {
 
       <div className="lg:col-span-2">
         <h2 className="font-display text-2xl font-semibold">No photo to hand? Try one of these</h2>
-        <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+        <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {SAMPLES.map((s) => (
             <li key={s.file}>
               <button
