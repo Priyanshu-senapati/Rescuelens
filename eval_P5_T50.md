@@ -90,8 +90,8 @@ Unknown-car check: 8.33% of known test cars wrongly flagged unknown; 96.67% of 6
 | Approach | What it is | Top-1 | Top-5 |
 |---|---|---|---|
 | Classical | HOG + HSV colour + LBP + geometry -> PCA -> logistic regression | 13.72% | 34.03% |
-| Deep learning | ConvNeXt-T on the whole photo | 91.66% | - |
-| Hybrid | detector crop + CLAHE when dark + calibrated fusion + safety layer | 94.55% | 99.27% |
+| Deep learning | ConvNeXt-Small on the whole photo | 91.66% | - |
+| Hybrid | annotated-box crop, calibrated, with the safety layer (detector and classifier not yet measured end to end) | 94.55% | 99.27% |
 Fusion weight on classical probabilities (chosen on validation): 0.0.
 
 ## Ablation (each row removes or swaps one component)

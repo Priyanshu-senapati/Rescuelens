@@ -68,7 +68,7 @@ Official Stanford Cars test split: 8,041 images, never used for training or tuni
 
 | P5 metric | Result |
 |---|---|
-| **Classification** | Top-1 **94.55%**, top-5 **99.27%** (ConvNeXt-Small, 384 px, detector crop) |
+| **Classification** | Top-1 **94.55%**, top-5 **99.27%** (ConvNeXt-Small, 384 px, on annotated-box crops) |
 | **Localization** | Mean IoU **0.954** (fine-tuned YOLO11s; 0.886 before fine-tuning, 0.639 for classical contours) |
 | **Detection** | mAP@0.5 **0.999**, mAP@0.5:0.95 **0.941** (0.892 / 0.825 before fine-tuning) |
 | **Efficiency** | 189.4 MB -> **54.3 MB** INT8, 739 ms -> **302 ms** on 2 CPU threads, no accuracy loss on a 300-image check |
@@ -222,13 +222,14 @@ Seed 42 everywhere; the validation split is a stratified 10% of the official tra
 | `tools/` | Report builder, unknown-car and crash evaluations, sample checker |
 | `docs/` | Design, API, sources, viva sheets, field kit |
 
-**Docs:** [Design](docs/design.md) · [API contract](docs/api-contract.md) · [High-voltage sources](docs/hazard-sources.md) · [Build plan](docs/BUILD_PLAN.md) · [Field kit](docs/field-kit.md) · [Viva sheets](docs/viva/) · [Evaluation](eval_P5_T50.md) · [Photo credits](frontend/public/samples/CREDITS.md)
+**Docs:** [Solution report](docs/Solution_Report_P5_T50.md) · [Design](docs/design.md) · [API contract](docs/api-contract.md) · [High-voltage sources](docs/hazard-sources.md) · [Build plan](docs/BUILD_PLAN.md) · [Field kit](docs/field-kit.md) · [Viva sheets](docs/viva/) · [Evaluation](eval_P5_T50.md) · [Photo credits](frontend/public/samples/CREDITS.md)
 
 ## What it can't do
 
 - It was trained on **US-market cars up to 2012**, so most cars on Indian roads today will be answered "unknown", on purpose. It doesn't recognise them.
 - **Close look-alikes can still fool it.** On 8 new photos of a Mahindra Thar, 5 were confidently called a Jeep Wrangler, with no high-voltage warning. That's why the app always says to confirm with VIN or plate.
 - There are **no crashed vehicles in the training data**. On 48 real crash photos it got the brand right only 23% of the time, and mostly declined to answer, which is what it should do.
+- **94.55% uses the dataset's annotated boxes.** It hasn't yet been re-measured through the real detector, though 99.85% of detector boxes reach IoU 0.5 or above.
 - **Weak spots:** severe blur (40% top-1), very low resolution (53%) and heavy occlusion (66%).
 - **Offline mode has not been measured** with the real models on a phone.
 - **No responder has reviewed the high-voltage text yet.**

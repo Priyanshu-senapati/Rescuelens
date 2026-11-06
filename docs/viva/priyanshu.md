@@ -7,7 +7,7 @@
 | Question | Short answer |
 |---|---|
 | How was it trained? | ConvNeXt-Small fine-tuned at 384 px on ground-truth crops (box + 8% margin), with flips, darkening, jitter and random erasing. Stratified 90/10 validation split, seed 42. The test split was used once, for final numbers. |
-| Why does the crop help? | Whole photo 91.66%, crop 94.55%: the network spends its pixels on the car rather than the background. |
+| Why does the crop help? | Whole photo 91.66%, crop 94.55%: more pixels on the car. That 94.55% uses annotated boxes, so say so; detector plus classifier end to end isn't measured yet. |
 | How is it deployed? | One warm 2-CPU Modal container with FastAPI and ONNX Runtime. Without model files the app falls back to sample answers instead of crashing. |
 
 **Your failure case:** Audi S5 taken for A5 (15 photos, our most frequent error): the trims differ mainly in grille, bumpers and badges.
