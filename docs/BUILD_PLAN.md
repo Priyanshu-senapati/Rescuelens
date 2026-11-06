@@ -37,6 +37,22 @@ back. Work top to bottom: section 2 is the critical path to a valid submission.
 
 ## 2. Critical path to submission (must do, in order)
 
+### 2.0 Finish the detector fine-tuning (started Fri 22:07, ~40 min)
+`training/finetune_detector.py` fine-tunes YOLO11s on the Stanford **train** boxes (one class "vehicle"); log:
+`training\finetune_detector_models.log`. When it prints `DONE` there are `models\yolo11s_cars.pt` and `.onnx`.
+1. Back up the current (COCO-pretrained) detector: `copy models\yolo11s.onnx models_run1\yolo11s_coco.onnx`
+2. Measure it on the full test split and export it as the app's detector (keeps the classical results, stores the old
+   numbers as `detection_pretrained` for the ablation table):
+   ```powershell
+   $env:DATA_ROOT="C:\Users\priyanshu\cv\data"; $env:EXPORT_DIR="models"; $env:QUICK="0"
+   $env:YOLO_WEIGHTS="models/yolo11s_cars.pt"; $env:SKIP_BASELINE="1"
+   training\.venv\Scripts\python.exe training\detector_and_baseline.py
+   ```
+3. Keep it only if mean IoU and mAP beat 0.886 / 0.892 (otherwise copy the backup back).
+4. Re-run `tools\eval_unknown.py` and `tools\build_report.py` (section 2.1 commands), restart the local server, update the
+   detector row in `README.md` and the detector line in `docs/design.md` section 5 ("fine-tuned on Stanford train boxes").
+   The back end already handles the single-class detector (`vehicle_scores()` in `backend/app/models.py`, tested).
+
 ### 2.1 Pick the final classifier (DONE 20:45 - run 2 / ConvNeXt-Small; kept for reference if a 22:00 model beats it)
 1. Open `training/train_classifier_models_small.log`, check it ends with `DONE`, read `"top1"` in `models_small/metrics.json`.
 2. Run 2 test top-1 is 0.9455 > 0.9418, so **switch to run 2** once its log says `DONE`:
