@@ -30,8 +30,8 @@ export function sweepSummary(points: SweepPoint[], condition: string): string {
   if (points.length < 2) return "";
   const at = firstChange(points);
   const start = NAME[points[0].status];
-  if (at < 0) return `Still "${start}" with the same answer, even at 100% ${condition}.`;
-  return `Held "${start}" up to ${Math.round(points[at - 1].level * 100)}% ${condition}. At ${Math.round(points[at].level * 100)}% the answer changed to "${NAME[points[at].status]}"${points[at].hv && !points[0].hv ? ", and the high-voltage warning came on" : ""}.`;
+  if (at < 0) return `Still "${start}" with the same answer, even at 100% on the ${condition} slider.`;
+  return `Held "${start}" up to ${Math.round(points[at - 1].level * 100)}% on the ${condition} slider. At ${Math.round(points[at].level * 100)}% the answer changed to "${NAME[points[at].status]}"${points[at].hv && !points[0].hv ? ", and the high-voltage warning came on" : ""}.`;
 }
 
 export default function SweepChart({ points, total, condition }: { points: SweepPoint[]; total: number; condition: string }) {
@@ -50,7 +50,7 @@ export default function SweepChart({ points, total, condition }: { points: Sweep
             <text x={PAD.l - 8} y={y(t) + 4} textAnchor="end" fontSize="12" fill="var(--color-ink-soft)">{t * 100}%</text>
           </g>
         ))}
-        <text x={W / 2} y={H - 6} textAnchor="middle" fontSize="12" fill="var(--color-ink-soft)">more {condition} (0 to 100%)</text>
+        <text x={W / 2} y={H - 6} textAnchor="middle" fontSize="12" fill="var(--color-ink-soft)">{condition} slider (0 to 100%)</text>
         {at > 0 && (
           <line x1={x(points[at].level)} x2={x(points[at].level)} y1={PAD.t} y2={H - PAD.b} stroke="var(--color-hv)" strokeWidth="2" strokeDasharray="4 4" />
         )}
