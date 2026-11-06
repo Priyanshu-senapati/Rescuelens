@@ -1,56 +1,128 @@
+<div align="center">
+
 # RescueLens
 
-Uncertainty-aware vehicle identification for crash response (Computer Vision Hackathon 2026, P5).
+### Point a phone at a crashed car. Know what it is, where the high voltage runs, and when not to trust the answer.
 
-**Live app: https://priyanshu-senapati--rescuelens-web.us-east.modal.run** (phone or laptop; deployed on Modal from `modal_app.py`)
+[![Live app](https://img.shields.io/badge/live_app-open_on_your_phone-e8651a?style=for-the-badge)](https://priyanshu-senapati--rescuelens-web.us-east.modal.run)
+[![CI](https://img.shields.io/github/actions/workflow/status/Priyanshu-senapati/Rescuelens/ci.yml?branch=main&style=for-the-badge&label=tests)](https://github.com/Priyanshu-senapati/Rescuelens/actions/workflows/ci.yml)
 
-Photo or live camera -> detect the vehicle -> identify make / model / year (196 Stanford Cars classes) ->
-decide what is safe to conclude: **identified**, **ambiguous** (e.g. hybrid can't be ruled out) or **unknown**.
-Point a phone at a car and the answer locks in once 3 frames agree; a high-voltage warning shows at once, with where the battery
-and cables are, from the manufacturer's guide.
+![Top-1 94.55%](https://img.shields.io/badge/top--1-94.55%25-2f5d8a)
+![Unknown cars caught 58 of 60](https://img.shields.io/badge/unknown_cars_caught-58_of_60-2f5d8a)
+![Hybrids missed 1.15%](https://img.shields.io/badge/hybrids_and_EVs_missed-1.15%25-e8651a)
+![CPU answer 302 ms](https://img.shields.io/badge/classifier_on_CPU-302_ms-2e7d4f)
 
-![Architecture](docs/architecture.png)
+<img src="docs/img/live-lock.gif" alt="Live camera mode: edges are drawn over the car, corner ticks lock on, and a high-voltage verdict with the battery location rises into view" width="800">
 
-## Results (official Stanford Cars test split, 8,041 images)
+<sub>Real answers from the deployed model, with this repository's guide data. The camera feed is simulated from a sample photo.</sub>
+
+</div>
+
+---
+
+## Most classifiers are built to be right. RescueLens is built to know when being wrong is dangerous.
+
+Before cutting a trapped person out of a car, rescuers need to know exactly what they are cutting. Hybrids and EVs hide high-voltage batteries and cables behind bodywork that can look identical to the petrol version. Today's tools need a number plate, VIN or QR code first, and at a crash those can be crushed, hidden or missing.
+
+**India had 4,80,583 road accidents and 1,72,890 deaths in 2023** ([MoRTH](https://data.opencity.in/dataset/road-accidents-in-india-2023)), while yearly EV registrations grew **from 1.74 lakh to 19.68 lakh** between FY 2019-20 and FY 2024-25 ([Lok Sabha, source: Vahan](https://heavyindustries.gov.in/sites/default/files/2026-03/lsauq_2913_0.pdf)). Sources and caveats are in the [design document](docs/design.md).
+
+RescueLens identifies a vehicle from how it looks, across 196 make, model and year classes, and then decides what is safe to conclude.
+
+## One model, three honest answers
+
+![Three results from the real model: identified Tesla Model S with a high-voltage warning, a partly hidden Chevrolet where a hybrid cannot be ruled out, and a Tata Nexon answered as not recognised](docs/img/three-answers.png)
+
+<sub>Real answers from the deployed model, with this repository's guide data.</sub>
+
+| Answer | When | What the responder is told |
+|---|---|---|
+| **Identified** | Sure of the exact model and year | The vehicle, plus where its battery and cables are if it's a hybrid or EV |
+| **Not certain** | Sure of the brand or family only | The part it is sure of. If a hybrid is possible at all, treat it as high voltage |
+| **Not recognised** | The car looks unlike anything it trained on | It refuses to guess. Treat as possibly high voltage and identify it by hand |
+
+## What it does
+
+- **Live camera that locks.** A frame every 1.5 s, with a live edge drawing and corner ticks on the detected vehicle. Three agreeing frames lock the answer.
+- **Warnings never wait.** A high-voltage warning shows on the first frame that raises it, and a car flickering between "warning" and "no warning" can never lock as safe.
+- **Summed-probability safety rule.** No single hybrid has to win. If all 9 hybrid/EV classes together reach 5%, the warning fires.
+- **Battery and cable locations.** Read from manufacturer guides for all 9 models, with [every source and caveat listed](docs/hazard-sources.md).
+- **Unknown-car detection.** Softmax confidence can stay high on cars it has never seen, so it also measures distance to the training cars.
+- **Stress test.** Drag darkness, smoke, blur or occlusion sliders and watch the answer and the advice change.
+- **Three approaches, side by side.** Classical computer vision, deep learning and the hybrid on the same photo, with every classical step visible.
+- **Works without signal (opt-in).** An installable app can run the models on the device, under the same safety rules, pinned to the server by a shared test file.
+- **Fails safely.** A crash shows safe advice and a "Start again" button, never a blank page.
+
+## Try these on the live app
+
+Answers from the real deployed model, 6 Nov 2026.
+
+| Sample | Answer | Why it's worth showing |
+|---|---|---|
+| Clear daylight photo | **Identified:** BMW M3 Coupe 2012, 98% | The easy case, with the full pipeline on show |
+| Hybrid that looks like a petrol car | **Identified:** Hyundai Sonata Hybrid 2012, 99%, high voltage | The whole pitch in one photo |
+| Taken at night | **Identified:** Audi S4 Sedan 2012, 92% | Darkness barely hurts accuracy |
+| Partly hidden | **Not certain:** Chevrolet, hybrid can't be ruled out | Uncertainty changes the advice |
+| Electric car | **Identified:** Tesla Model S 2012, 98%, high voltage | Finds the EV and warns about it |
+| Look-alike trim: S5 or A5? | **Not certain:** Audi, model uncertain | Its most frequent mix-up, and it says so |
+| Indian car outside the 196 models | **Not recognised** | Refuses to guess at a Tata Nexon |
+
+## The numbers
+
+Official Stanford Cars test split: 8,041 images, never used for training or tuning.
 
 | | |
 |---|---|
-| Top-1 / Top-5 accuracy | **94.55% / 99.27%** (ConvNeXt-Small, 384 px, detector crop; 94.70% with flip TTA) |
-| Vehicle localisation (YOLO11s) | mean IoU **0.886**, mAP@0.5 **0.892**, mAP@0.5:0.95 0.825 |
-| Classical-only vs deep (whole photo) vs hybrid | 13.7% vs 91.7% vs **94.6%** top-1 |
-| Model size / CPU latency | 189.4 MB -> **54.3 MB** INT8, 739 ms -> **302 ms** (2 threads), no accuracy loss on a 300-image check |
-| Calibration | ECE 0.098 -> **0.011** after temperature scaling |
-| Missed hybrids / EVs | **1.2%** with the summed-probability warning vs 4.3% using the top-1 label |
-| Unseen car models (30 models, 60 photos) | **96.7%** answered "unknown"; 8.3% of known test cars wrongly flagged |
+| **Top-1 / top-5 accuracy** | **94.55% / 99.27%** (ConvNeXt-Small, 384 px, detector crop) |
+| **Finding the vehicle** (YOLO11s) | mean IoU **0.886**, mAP@0.5 **0.892**, mAP@0.5:0.95 0.825 |
+| **Classical vs deep vs hybrid** | 13.7% vs 91.7% vs **94.6%** top-1 |
+| **Missed hybrids and EVs** | **1.15%** with the summed rule vs 4.32% trusting the top answer, with 0.69% false alarms |
+| **Unseen car models** (30 models, 60 photos) | **96.7%** answered "unknown"; 8.3% of known cars wrongly flagged |
+| **Calibration** | ECE 0.098 -> **0.011** after temperature scaling |
+| **Model size / CPU latency** | 189.4 MB -> **54.3 MB** INT8, 739 ms -> **302 ms** on 2 threads, no accuracy loss on a 300-image check |
 
-Full tables (robustness, ablation, thresholds, failure cases): [`eval_P5_T50.md`](eval_P5_T50.md).
+Robustness, ablation, thresholds and failure cases: [`eval_P5_T50.md`](eval_P5_T50.md).
 
-| Folder | What |
-|---|---|
-| `training/` | Training + evaluation scripts (Kaggle or local GPU): classifier, detector eval, classical baseline |
-| `backend/` | FastAPI inference service (ONNX Runtime) |
-| `frontend/` | React UI |
-| `data/` | class names, high-voltage class list |
-| `docs/` | API contract, fixtures, design doc |
+<details>
+<summary><b>See the Model report page</b></summary>
 
-**Build plan / handover (pending work, dropped features): [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md)** · Jobs for people, not code: [docs/field-kit.md](docs/field-kit.md) · Viva sheets: [docs/viva/](docs/viva/) · High-voltage sources: [docs/hazard-sources.md](docs/hazard-sources.md) · Design document + architecture diagram: [docs/design.md](docs/design.md) · API: [docs/api-contract.md](docs/api-contract.md) · Evaluation: `eval_P5_T50.md`
+![The Model report page with accuracy figures, the high-voltage threshold table and the unknown-car result](docs/img/model-report.png)
+
+</details>
+
+## How it works
+
+![Architecture: photo or camera frame, validation, YOLO11s detector, crop, classical CV and ConvNeXt-Small classifier, calibrated probabilities and unknown score, safety engine, then the UI](docs/architecture.png)
+
+Reasoning behind each choice: [design document](docs/design.md).
 
 ## Run it
 
 ```bash
-docker build -t rescuelens --build-arg MODEL_BASE_URL=https://huggingface.co/<user>/rescuelens-models/resolve/main .
+docker build -t rescuelens --build-arg MODEL_BASE_URL=<folder-with-the-model-files> .
 docker run -p 7860:7860 rescuelens          # open http://localhost:7860
 ```
 
-Without `MODEL_BASE_URL` the app starts in mock mode (fixture responses), which is handy for UI work.
+Without `MODEL_BASE_URL` the app starts in mock mode with fixture responses. For UI work with no back end:
 
-Back-end tests: `cd backend && pip install -r requirements.txt -r requirements-dev.txt && pytest`
+```bash
+cd frontend && npm ci && VITE_MOCK=1 npm run dev
+```
 
-Browser tests: `cd frontend && npm ci && npx playwright install chromium && npm test`. CI runs both on every push.
+The live deployment runs on Modal: `modal deploy modal_app.py`. The camera needs https or localhost.
 
-Pre-test the demo samples on the real models: `python tools/check_samples.py`
+### Tests
 
-## Reproduce the numbers
+```bash
+cd backend && pip install -r requirements.txt -r requirements-dev.txt && pytest
+```
+
+```bash
+cd frontend && npm ci && npx playwright install chromium && npm test
+```
+
+CI runs both on every push. Check the demo samples against the real models with `python tools/check_samples.py`.
+
+### Reproduce the numbers
 
 1. Get Stanford Cars with test labels (e.g. Kaggle `jutrera/stanford-car-dataset-by-classes-folder`) and extract it.
 2. Python 3.11 + CUDA PyTorch, then `pip install timm onnx onnxruntime onnxscript scikit-learn scipy "opencv-python-headless<5" pillow ultralytics`.
@@ -59,3 +131,32 @@ Pre-test the demo samples on the real models: `python tools/check_samples.py`
    `python training/detector_and_baseline.py`. On Windows, `training\run_local.ps1` starts them as background processes.
 4. `python tools/build_report.py --train models --det models --team T50 --usns "..."` writes `eval_P5_T50.md`.
    Seed 42 everywhere; the validation split is a stratified 10% of the official train split.
+
+## Find your way around
+
+| Folder | What |
+|---|---|
+| `training/` | Training and evaluation scripts: classifier, detector, classical baseline |
+| `backend/` | FastAPI inference service (ONNX Runtime) and the safety engine |
+| `frontend/` | React UI: live camera, results, stress test, Model report, offline mode |
+| `data/` | Class names, hybrid/EV guides and locations, measured safety numbers |
+| `tools/` | Report builder, unknown-car evaluation, sample checker |
+| `docs/` | Design, API, sources, viva sheets, field kit |
+
+**Docs:** [Design](docs/design.md) · [API contract](docs/api-contract.md) · [High-voltage sources](docs/hazard-sources.md) · [Build plan](docs/BUILD_PLAN.md) · [Field kit](docs/field-kit.md) · [Viva sheets](docs/viva/) · [Evaluation](eval_P5_T50.md) · [Photo credits](frontend/public/samples/CREDITS.md)
+
+## What it can't do
+
+- It was trained on **US-market cars up to 2012**, so most cars on Indian roads today will be answered "unknown", on purpose. It doesn't recognise them.
+- There are **no crashed vehicles in the data**. Robustness is measured with simulated darkness, haze, blur, low resolution and occlusion.
+- **Weak spots:** severe blur (40% top-1), very low resolution (53%) and heavy occlusion (66%).
+- **Offline mode has not been measured** with the real models on a phone.
+- **No responder has reviewed the high-voltage text yet.**
+
+> **Decision-support prototype.** Vehicle identification is probabilistic. Never rely on it alone for cutting, lifting or disabling a vehicle. It reads no number plates or faces, and uploads are processed in memory and not kept.
+
+## Team T50 "Clover"
+
+Computer Vision Hackathon 2026, problem statement P5: Intelligent Fine-Grained Vehicle Recognition and Analysis System.
+
+Priyanshu Kumar Senapati · Saatwik Kumar Yadav · Rachana Bhaskar Gowda · R Muni Disnitha

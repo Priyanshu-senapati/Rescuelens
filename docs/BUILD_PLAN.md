@@ -234,7 +234,7 @@ Small doc/JSON edits can be made directly on github.com (pencil icon) as a pull 
 The UI runs without the back end: `cd frontend; npm ci; $env:VITE_MOCK="1"; npm run dev` (answers come from `docs/fixtures`).
 1. [x] **Live camera mode** (high wow factor): a "Point camera" button that opens the rear camera (`getUserMedia`), sends a frame
        to `/api/analyze` every ~1.5 s while the vehicle is in view, and locks the answer when the same label wins 3 frames in a row.
-2. [x] **Demo samples** (still to pre-test on the real models: `python tools/check_samples.py`): add one pre-tested "ambiguous" sample and one "unknown car" sample (from `private_photos/unknown`, ask
+2. [x] **Demo samples** (pre-tested on the live model on 6 Nov; re-run `python tools/check_samples.py` if the model changes): add one pre-tested "ambiguous" sample and one "unknown car" sample (from `private_photos/unknown`, ask
        Priyanshu; Wikimedia licence: keep author + licence in `frontend/public/samples/CREDITS.md`).
 3. [x] **Robustness of the UI**: React error boundary with a "Start again" button; Playwright test: open page -> pick a sample ->
        result card visible (mock mode); GitHub Action that runs `pytest` (backend) + `npm run build` (frontend) on every push.

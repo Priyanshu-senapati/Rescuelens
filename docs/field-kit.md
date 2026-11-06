@@ -84,16 +84,19 @@ it before trusting it, then keep a copy on two laptops and a phone. If the venue
 Also take the 3 failure-case screenshots for the design doc from the live app: an "ambiguous" stress test, Thar -> Wrangler and a
 heavy blur.
 
-## 5. Before the demo: run the samples through the real models
+## 5. Before the demo
 
-The two new samples have **not** been run through the trained models, because the model files aren't in the repo. Priyanshu:
+All 7 samples were run through the real model on the live URL on 6 Nov 2026, and both new ones answer as intended. If the model changes, for example after the detector fine-tuning, check them again:
 
 ```bash
 python tools/check_samples.py
 ```
 
-If a sample doesn't give its expected answer, swap the photo instead of changing the label. Also check the live camera on a
-real phone, on the live https URL: browsers only open the camera on https or localhost.
+If a sample doesn't give its expected answer, swap the photo instead of changing the label.
+
+**Redeploy after merging this work.** The live site keeps the old guide data until then, and links a Tesla or Chevrolet to the Hyundai guide because that was the only one on file.
+
+Then check the live camera on a real phone on the live https URL. It has only run against the real model with a simulated camera feed.
 
 ## 6. Decide on offline mode (team decision)
 
