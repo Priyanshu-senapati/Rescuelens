@@ -39,7 +39,7 @@ flowchart LR
     D --> R[ROI crop<br/>box + 8% margin]
     D2 --> R
     R --> C[Classical CV<br/>CLAHE, Canny, contours,<br/>Hough wheels, colour k-means,<br/>quality scores]
-    R --> M[ConvNeXt-Tiny classifier<br/>ONNX INT8, 196 classes]
+    R --> M[ConvNeXt-Small classifier<br/>ONNX INT8, 196 classes]
     V -. whole photo, for the comparison panel .-> M
     M --> P[Temperature-calibrated<br/>probabilities]
     M --> K[Embedding -> kNN distance<br/>to training cars = unknown score]
@@ -79,7 +79,7 @@ flowchart LR
 
 | Choice | Why |
 |---|---|
-| **ConvNeXt-Tiny**, ImageNet-22k pretrained, fine-tuned at 384 px | Strong fine-grained transfer at 28 M parameters; small enough for CPU inference after INT8 |
+| **ConvNeXt-Small**, ImageNet-22k pretrained, fine-tuned at 384 px | Strong fine-grained transfer; 50 M parameters, 302 ms on 2 CPU threads after INT8. ConvNeXt-Tiny (28 M) was trained first: 94.18% vs 94.55% top-1, 88.3% vs 96.7% unknown cars caught |
 | **YOLO11s** COCO-pretrained (car/bus/truck) | Stanford images are single-vehicle, so a pretrained detector already localises well; no labelled crash data to fine-tune on |
 | **Classical baseline**: HOG + HSV histogram + LBP + aspect ratio -> PCA(256) -> logistic regression | Required comparison; uses exactly the same feature code as the app |
 | **Temperature scaling** on validation | Raw softmax is over/under-confident; calibrated probabilities make thresholds meaningful |
@@ -89,7 +89,7 @@ flowchart LR
 ## 6. Hybrid integration (where classical CV earns its place)
 
 1. **Localisation**: detector crop vs whole image (ablation: crop vs no crop).
-2. **Enhancement**: CLAHE as a detector retry when nothing is found, and in the visual pipeline. We measured CLAHE before the classifier on darkened test photos: it cost 0.3-0.5 points, because training-time darkening already made the network brightness-robust, so it is switched off for classification (an ablation result we kept).
+2. **Enhancement**: CLAHE as a detector retry when nothing is found, and in the visual pipeline. We measured CLAHE before the classifier on darkened test photos: it did not help (ConvNeXt-Tiny: -0.3 to -0.5 points, ConvNeXt-Small: within +/-0.1), because training-time darkening already made the network brightness-robust, so it is switched off for classification (an ablation result we kept).
 3. **Measurement**: brightness, contrast, sharpness (Laplacian variance), resolution and cut-off checks explain
    *why* a prediction is unreliable ("Low light", "Blurry").
 4. **Late fusion**: classical-baseline probabilities fused with deep probabilities, weight chosen on validation - the best weight was 0 (the classical model adds no information the network lacks), reported as-is.
@@ -101,7 +101,7 @@ flowchart LR
   level it is sure of.
 * **States**: `identified` (vehicle prob >= 0.6) · `ambiguous` (family or make level) · `unknown`
   (unknown score above threshold or make prob < 0.5).
-* **High voltage**: P(hybrid/EV) = sum of the 9 hybrid/EV class probabilities. Warn at >= 0.05 (miss rate 0.9% vs 4.6% for the top-1 label, false alarms 0.7%) - because missing a hybrid
+* **High voltage**: P(hybrid/EV) = sum of the 9 hybrid/EV class probabilities. Warn at >= 0.05 (miss rate 1.2% vs 4.3% for the top-1 label, false alarms 0.7%) - because missing a hybrid
   is far worse than a false alarm. Unknown vehicles are treated as *possibly* high-voltage.
 * Thresholds come from the validation set; the threshold table (miss rate vs false alarms) is in the eval file.
 
@@ -113,25 +113,25 @@ high-voltage miss / false-alarm rates, classical vs deep vs hybrid, ablation, mo
 
 ## 9. Failure cases (from the test-set confusion counts in `eval_P5_T50.md`)
 
-1. **Same vehicle, different trim**: *Chevrolet Express Cargo Van 2007* taken for *Chevrolet Express Van 2007*
-   (14 test photos, the most frequent error). The two differ mainly in rear side windows, often out of frame.
+1. **Same vehicle, different trim**: *Chevrolet Express Van 2007* taken for *Chevrolet Express Cargo Van 2007*
+   (9 test photos). The two differ mainly in rear side windows, often out of frame.
    Cause: the label distinguishes a body option, not a shape. Safety impact: none (same structure, same powertrain).
-2. **Same model, different year / generation**: *Dodge Caliber Wagon 2012* taken for the *2007* model (10),
-   *Audi V8 Sedan 1994* for *Audi 100 Sedan 1994* (10), *Audi S5 Coupe* for *Audi A5 Coupe* (9).
+2. **Same model, different trim / year**: *Audi S5 Coupe* taken for *Audi A5 Coupe* (15, the most frequent error),
+   *Dodge Caliber Wagon 2012* for the *2007* model (13), *Bentley Continental GT Coupe 2007* for the *2012* model (11).
    Cause: facelifts and performance trims change only grilles, bumpers and badges. Mitigation: the family-level
    answer ("Audi A5/S5 family") is reported when the year cannot be separated.
 3. **Rebadged twins**: *Dodge Sprinter Cargo Van 2009* taken for *Mercedes-Benz Sprinter Van 2012* (8) - the same van
    sold under two brands. A badge-level detail the network rarely sees at 384 px.
-4. **Degraded photos** (robustness table): strong blur drops top-1 to 44%, a 40 px vehicle to 55%, and hiding 45% of
-   the vehicle to 62%. The quality checks flag these photos ("Blurry", "Low resolution") so the low confidence is
+4. **Degraded photos** (robustness table): strong blur drops top-1 to 40%, a 40 px vehicle to 53%, and hiding 45% of
+   the vehicle to 66%. The quality checks flag these photos ("Blurry", "Low resolution") so the low confidence is
    explained rather than hidden.
 5. **Same body, different powertrain**: Hyundai Sonata Sedan vs Sonata Hybrid 2012. The summed high-voltage
-   probability cuts missed hybrids/EVs from 4.6% (top-1 label) to 0.9%.
+   probability cuts missed hybrids/EVs from 4.3% (top-1 label) to 1.2%.
 6. **Out-of-distribution cars**: on 60 freely licensed Wikimedia Commons photos of 30 models the network never saw
    (Indian models such as Swift, Nexon, Creta, Thar, Innova; post-2012 EVs such as Tesla Model 3/Y, Ioniq 5, ID.4),
-   **88.3%** were answered "unknown" while only 5% of known test cars are wrongly flagged. The misses are look-alikes:
-   Mahindra Thar taken for Jeep Wrangler (the Thar is styled on it), Tesla Model Y for Tesla Model S - where the
-   high-voltage warning still fired - and MG Hector answered "not certain" rather than "unknown".
+   **96.7%** were answered "unknown" (58 of 60) while 8.3% of known test cars are wrongly flagged. The two misses are
+   look-alikes: Mahindra Thar taken for Jeep Wrangler (the Thar is styled on it) and Renault Kwid for Nissan Juke.
+   (ConvNeXt-Tiny caught 88.3% and also mistook Tesla Model Y for Model S - with the high-voltage warning still firing.)
 
 ## 10. Deployment
 

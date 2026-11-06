@@ -27,7 +27,8 @@ back. Work top to bottom: section 2 is the critical path to a valid submission.
 
 ### Running / in progress when this was written
 - **Run 2 (ConvNeXt-Small, 384 px)**: best val 94.23% (run 1: 93.74%), **test top-1 94.55% / top-5 99.27%**
-  (run 1: 94.18% / 99.05%), whole-photo 91.66%. **Run 2 is the better model -> switch to it (section 2.1).**
+  (run 1: 94.18% / 99.05%), whole-photo 91.66%. **Done (20:45): `models/` now holds run 2; run 1 is backed up in `models_run1/`.**
+  Run 2 also catches 96.7% of unseen cars (run 1: 88.3%); trade-off: 1.2% missed hybrids (run 1: 0.9%), 302 ms vs 127 ms CPU.
   Its robustness/ONNX/INT8 steps were still running and write everything to `models_small/`
   (log: `training/train_classifier_models_small.log`, wait for `DONE`).
 - Local server with the run-1 model: `http://localhost:8765` (started from `backend/` with `MODEL_DIR=models`).
@@ -36,7 +37,7 @@ back. Work top to bottom: section 2 is the critical path to a valid submission.
 
 ## 2. Critical path to submission (must do, in order)
 
-### 2.1 Pick the final classifier (10 min)
+### 2.1 Pick the final classifier (DONE 20:45 - run 2 / ConvNeXt-Small; kept for reference if a 22:00 model beats it)
 1. Open `training/train_classifier_models_small.log`, check it ends with `DONE`, read `"top1"` in `models_small/metrics.json`.
 2. Run 2 test top-1 is 0.9455 > 0.9418, so **switch to run 2** once its log says `DONE`:
    ```powershell

@@ -9,12 +9,13 @@ decide what is safe to conclude: **identified**, **ambiguous** (e.g. hybrid can'
 
 | | |
 |---|---|
-| Top-1 / Top-5 accuracy | **94.18% / 99.05%** (ConvNeXt-Tiny, 384 px, detector crop) |
+| Top-1 / Top-5 accuracy | **94.55% / 99.27%** (ConvNeXt-Small, 384 px, detector crop; 94.70% with flip TTA) |
 | Vehicle localisation (YOLO11s) | mean IoU **0.886**, mAP@0.5 **0.892**, mAP@0.5:0.95 0.825 |
-| Classical-only vs deep (whole photo) vs hybrid | 13.7% vs 90.9% vs **94.2%** top-1 |
-| Model size / CPU latency | 106.8 MB -> **32.4 MB** INT8, 324 ms -> **127 ms** (2 threads), 94.3% -> 94.0% |
-| Calibration | ECE 0.125 -> **0.017** after temperature scaling |
-| Missed hybrids / EVs | **0.9%** with the summed-probability warning vs 4.6% using the top-1 label |
+| Classical-only vs deep (whole photo) vs hybrid | 13.7% vs 91.7% vs **94.6%** top-1 |
+| Model size / CPU latency | 189.4 MB -> **54.3 MB** INT8, 739 ms -> **302 ms** (2 threads), no accuracy loss on a 300-image check |
+| Calibration | ECE 0.098 -> **0.011** after temperature scaling |
+| Missed hybrids / EVs | **1.2%** with the summed-probability warning vs 4.3% using the top-1 label |
+| Unseen car models (30 models, 60 photos) | **96.7%** answered "unknown"; 8.3% of known test cars wrongly flagged |
 
 Full tables (robustness, ablation, thresholds, failure cases): [`eval_P5_T50.md`](eval_P5_T50.md).
 
