@@ -103,7 +103,7 @@ flowchart LR
 ## 6. Hybrid integration (where classical CV earns its place)
 
 1. **Localisation**: detector crop vs whole image (ablation: crop vs no crop).
-2. **Enhancement**: CLAHE as a detector retry when nothing is found, and in the visual pipeline. We measured CLAHE before the classifier on darkened test photos: it did not help (ConvNeXt-Tiny: -0.3 to -0.5 points, ConvNeXt-Small: within +/-0.1), because training-time darkening already made the network brightness-robust, so it is switched off for classification (an ablation result we kept).
+2. **Enhancement**: CLAHE as a detector retry when nothing is found, and in the visual pipeline. We measured CLAHE before the classifier on darkened test photos: it did not help (ConvNeXt-Tiny: -0.3 to -0.5 points, ConvNeXt-Small: within +/-0.1), because training-time darkening already made the network brightness-robust, so it is not used alone for classification (an ablation result we kept). Dark crops now get a second reading instead: see Night photos below.
 3. **Measurement**: brightness, contrast, sharpness (Laplacian variance), resolution and cut-off checks explain
    *why* a prediction is unreliable ("Low light", "Blurry").
 4. **Late fusion**: classical-baseline probabilities fused with deep probabilities, weight chosen on validation - the best weight was 0 (the classical model adds no information the network lacks), reported as-is.
@@ -164,6 +164,12 @@ high-voltage miss / false-alarm rates, classical vs deep vs hybrid, ablation, mo
 5. **Degraded photos** (robustness table): strong blur drops top-1 to 40%, a 40 px vehicle to 53%, and hiding 45% of
    the vehicle to 66%. The quality checks flag these photos ("Blurry", "Low resolution") so the low confidence is
    explained rather than hidden.
+
+   ![The automatic sweep on the Sonata: the answer holds until maximum blur, then becomes Not recognised](img/failure-blur.png)
+
+   Partial occlusion can leave an honest middle answer rather than a wrong one:
+
+   ![A partly hidden Chevrolet Silverado answered as Not certain, with a hybrid not ruled out](img/failure-ambiguous.png)
 6. **Same body, different powertrain**: Hyundai Sonata Sedan vs Sonata Hybrid 2012. The summed high-voltage
    probability cuts missed hybrids/EVs from 4.3% (top-1 label) to 1.2%.
 7. **Out-of-distribution cars**: on 60 freely licensed Wikimedia Commons photos of 30 models the network never saw
@@ -171,6 +177,13 @@ high-voltage miss / false-alarm rates, classical vs deep vs hybrid, ablation, mo
    **96.7%** were answered "unknown" (58 of 60) while 8.3% of known test cars are wrongly flagged. The two misses are
    look-alikes: Mahindra Thar taken for Jeep Wrangler (the Thar is styled on it) and Renault Kwid for Nissan Juke.
    (ConvNeXt-Tiny caught 88.3% and also mistook Tesla Model Y for Model S - with the high-voltage warning still firing.)
+   **The Thar miss is systematic, not a one-off.** On 8 further Commons photos of the Thar, on the live model, 7 Nov 2026, 5 were
+   identified as *Jeep Wrangler SUV 2012* at 65-99% with no high-voltage warning, and 3 were answered "unknown". Its embedding sits
+   close to a known car, so the distance check passes it. This small test suggests look-alikes are worse than 96.7% implies.
+
+   ![A Mahindra Thar confidently identified as a Jeep Wrangler](img/failure-thar.png)
+
+   <sub>Photo: Mahindra Thar SUV in "Red Rage" colour, by Ank Kumar, CC BY-SA 4.0, Wikimedia Commons.</sub>
 
 8. **Real crashed vehicles** (48 Wikimedia Commons photos, brand known from the title, most of them models or years
    outside the 196 classes): the brand was right only 23 % of the time - wrecks and unseen models are far outside the
@@ -191,7 +204,7 @@ installable PWA, and when the network fails or is too slow it runs the detector,
 with ONNX Runtime Web (WebAssembly). The same answer shape comes back, marked as answered on the device.
 
 * **Same safety rules:** the TypeScript port and `safety.py` are both tested against `docs/fixtures/safety_golden.json`.
-* **What's different:** no CLAHE detector retry, no classical pipeline or comparison, and a canvas resize instead of PIL.
+* **What's different:** no CLAHE detector retry or night second reading, no close-up brand expert, no classical pipeline or comparison, and a canvas resize instead of PIL.
 * **Not yet measured:** the eval numbers are for the server. The browser path has only been tested with stand-in models, so accuracy,
   speed and memory on a real phone with the real 54 MB classifier are unknown. Analysis also blocks the page while it runs.
 * **Off by default:** the host must set `OFFLINE_MODELS=1`, because it makes the weights publicly downloadable.

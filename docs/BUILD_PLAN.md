@@ -117,8 +117,8 @@ and update the "Run it" section of the README. (Decide as a team; it makes the m
 2. (0:20-0:50) Clear sample -> identified, box, pipeline steps.
 3. (0:50-1:20) "Hybrid that looks like a petrol car": classical-only says Sonata (petrol), RescueLens says Sonata **Hybrid**
    + high-voltage banner + official guide.
-4. (1:20-1:50) Stress test: press "Sweep occlusion" or "Sweep blur" and let the curve show where the answer breaks.
-5. (1:50-2:20) Judge's own photo (likely an Indian car) -> "Not recognised, treat as possibly high-voltage".
+4. (1:20-1:50) Stress test on the clear BMW: press "Sweep occlusion". It holds, then flips to "Not recognised" and the warning comes on (best tested story). Say "slider", not "% hidden".
+5. (1:50-2:20) Judge's own photo (likely an Indian car) -> "Not recognised, treat as possibly high-voltage". A Mahindra Thar may come back as a confident Jeep Wrangler: own it, and say this is why the app insists on VIN or plate.
 6. (2:20-2:50) Model report: 94.55% top-1, crop +2.9 points, INT8 3.5x smaller, 1.15% missed hybrids, 58 of 60 unknown cars caught.
    Live camera goes into step 4 if the phone and venue connection allow it (see `docs/field-kit.md` section 5).
 7. (2:50-3:00) "Most classifiers are built to be right; RescueLens is built to know when being wrong is dangerous."
@@ -194,6 +194,7 @@ Rules: never evaluate on the test split while choosing settings (use val); keep 
 ---
 
 ## 5. Known issues and limits (put these in the viva answers)
+- Close look-alikes: 5 of 8 new Mahindra Thar photos were identified as Jeep Wrangler at 65-99% with no warning (7 Nov, live model).
 - Stanford Cars stops at 2012 and is US-market only; newer/Indian cars are flagged unknown (96.7% of the time on 60 photos), not identified.
 - No crashed vehicles in the data; robustness is measured with simulated darkness, haze, blur, low resolution and occlusion.
 - Severe blur (40% top-1), very low resolution (53%) and heavy occlusion (66%) are the real weak spots.
@@ -263,7 +264,7 @@ The UI runs without the back end: `cd frontend; npm ci; $env:VITE_MOCK="1"; npm 
        These are our honest "judge-style" unseen inputs. Put them in a shared Drive folder (not git); Priyanshu runs
        `tools/eval_unknown.py` on them for a second, independent unknown-car number.
 2. [ ] **Design doc**: fill section 14 (each member's role); ask the organisers about the design-doc template and the rubric
-       weights; add 3 failure-case screenshots (ambiguous stress test, Thar -> Wrangler, heavy blur) once the live URL exists.
+       weights; 3 failure-case screenshots added (not-certain occlusion, Thar -> Wrangler, heavy blur).
 3. [x] **Architecture diagram as an image** (draw.io / Excalidraw, same boxes as the mermaid diagram in `docs/design.md`) for the
        README and any slides; export PNG to `docs/architecture.png`.
 4. [ ] **Demo backup video** (one command once the live URL exists: `npm run demo:record`, see `docs/field-kit.md`): a 3-minute screen recording following the script in section 2.5 (record from the live URL or
