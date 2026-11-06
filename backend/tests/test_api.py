@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from PIL import Image
 
 from app.main import create_app
-from app.pipeline import Engine, analyze
+from app.pipeline import Engine, analyze, analyze_views
 from app.safety import Thresholds, load_classes
 
 FIXTURES = Path(__file__).resolve().parents[2] / "docs" / "fixtures"
@@ -107,3 +107,74 @@ def test_dark_photo_gets_a_second_opinion_from_a_contrast_boosted_copy():
     assert len(calls) == 3                                  # crop, boosted crop, whole photo (comparison panel)
     assert calls[1] > calls[0]                              # the second pass really is brighter
     assert any("contrast-boosted" in x for x in out["reliability"]["reasons"])
+
+
+def test_a_second_photo_of_an_intact_side_can_decide_the_answer():
+    def flat_wreck(_):                                       # crushed front: no idea, looks unfamiliar
+        return np.full(len(CLASSES), 1 / len(CLASSES)), 0.9
+
+    def clear_rear(_):
+        p = np.full(len(CLASSES), 0.02 / (len(CLASSES) - 1))
+        p[IDX["Hyundai Sonata Hybrid Sedan 2012"]] = 0.98
+        return p, 0.1
+
+    views = iter([flat_wreck, clear_rear, flat_wreck])       # view 1, view 2, then the comparison panel's whole photo
+    eng = Engine(detector=lambda rgb: [((100, 150, 500, 330), 0.9)], classifier=lambda x: next(views)(x),
+                 baseline=None, classes=CLASSES, thresholds=Thresholds())
+    out = analyze_views([car_photo(), car_photo()], eng)
+    assert out["status"] == "identified" and out["prediction"]["label"] == "Hyundai Sonata Hybrid Sedan 2012"
+    assert out["safety"]["hv_warning"] is True
+    assert [v["vehicle_found"] for v in out["views"]] == [True, True]
+    assert out["views"][0]["unknown_score"] == 0.9 and out["unknown"]["score"] == 0.1
+    assert any("Combined 2 photos" in x for x in out["reliability"]["reasons"])
+    assert "Photo 1 on its own was not recognised; the answer rests on the other photos" in out["reliability"]["reasons"]
+
+
+def test_a_photo_without_a_vehicle_is_skipped_not_fatal():
+    dets = iter([[], [], [((100, 150, 500, 330), 0.9)]])      # photo 1: nothing, even after boost; photo 2: a car
+    eng = Engine(detector=lambda rgb: next(dets), classifier=sonata_classifier, baseline=None,
+                 classes=CLASSES, thresholds=Thresholds())
+    out = analyze_views([car_photo(), car_photo()], eng)
+    assert out["status"] == "ambiguous" and [v["vehicle_found"] for v in out["views"]] == [False, True]
+
+
+def test_up_to_three_photos_accepted_four_rejected():
+    photo = ("car.png", png_bytes(), "image/png")
+    assert client.post("/api/analyze", files=[("file", photo)] * 3).status_code == 200
+    r = client.post("/api/analyze", files=[("file", photo)] * 4)
+    assert r.status_code == 400 and r.json()["error"]["code"] == "too_many_files"
+
+
+def test_photos_of_two_different_vehicles_are_not_merged_into_one_answer():
+    def confident(label):
+        def clf(_):
+            p = np.full(len(CLASSES), 0.02 / (len(CLASSES) - 1))
+            p[IDX[label]] = 0.98
+            return p, 0.1
+        return clf
+
+    views = iter([confident("Hyundai Sonata Hybrid Sedan 2012"), confident("BMW M3 Coupe 2012"),
+                  confident("Hyundai Sonata Hybrid Sedan 2012")])
+    eng = Engine(detector=lambda rgb: [((100, 150, 500, 330), 0.9)], classifier=lambda x: next(views)(x),
+                 baseline=None, classes=CLASSES, thresholds=Thresholds())
+    out = analyze_views([car_photo(), car_photo()], eng)
+    assert out["status"] == "unknown" and "different vehicles" in out["headline"]
+    assert out["safety"]["hv_warning"] is True and out["safety"]["level"] == "caution"
+    assert out["reliability"]["reasons"][0] == "Photo 1 reads as Hyundai Sonata, photo 2 as BMW M3"
+    assert out["comparison"]["hybrid"]["status"] == "unknown"
+
+
+def test_look_alike_families_of_one_make_are_reported_not_refused():
+    def confident(label):
+        def clf(_):
+            p = np.full(len(CLASSES), 0.3 / (len(CLASSES) - 1))
+            p[IDX[label]] = 0.7
+            return p, 0.1
+        return clf
+
+    views = iter([confident("Audi S4 Sedan 2012"), confident("Audi S5 Coupe 2012"), confident("Audi S4 Sedan 2012")])
+    eng = Engine(detector=lambda rgb: [((100, 150, 500, 330), 0.9)], classifier=lambda x: next(views)(x),
+                 baseline=None, classes=CLASSES, thresholds=Thresholds())
+    out = analyze_views([car_photo(), car_photo()], eng)
+    assert "different vehicles" not in out["headline"] and out["hierarchy"][0]["name"] == "Audi"
+    assert out["reliability"]["reasons"][0] == "Photo 1 reads as Audi S4, photo 2 as Audi S5"

@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-from .pipeline import analyze, load_engine
+from .pipeline import analyze_views, load_engine
 
 try:                                         # iPhone photos
     from pillow_heif import register_heif_opener
@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parents[2]
 MODEL_DIR = Path(os.environ.get("MODEL_DIR", ROOT / "models"))
 FRONTEND_DIST = Path(os.environ.get("FRONTEND_DIST", ROOT / "frontend" / "dist"))
 FIXTURES = ROOT / "docs" / "fixtures"
+MAX_VIEWS = 3                                # e.g. crushed front + rear + side of one vehicle
 MAX_BYTES = 10 * 2**20
 OFFLINE_FILES = {"config.json", "classifier_int8.onnx", "train_emb.npy", "yolo11s.onnx"}
 MAX_SIDE = 1600                              # bigger photos are shrunk first: faster, same accuracy
@@ -79,18 +80,22 @@ def create_app() -> FastAPI:
                 "version": app.version}
 
     @app.post("/api/analyze")
-    def analyze_photo(file: UploadFile | None = File(None)) -> dict:
-        if file is None:
+    def analyze_photo(file: list[UploadFile] | None = File(None)) -> dict:
+        if not file:
             raise ApiError(400, "missing_file", "No photo received. Attach it as the 'file' field.")
-        data = file.file.read(MAX_BYTES + 1)
-        if len(data) > MAX_BYTES:
-            raise ApiError(413, "too_large", "That photo is over 10 MB. Try a smaller one.")
-        rgb = load_rgb(data)
+        if len(file) > MAX_VIEWS:
+            raise ApiError(400, "too_many_files", f"Send at most {MAX_VIEWS} photos of the same vehicle.")
+        rgbs = []
+        for f in file:
+            data = f.file.read(MAX_BYTES + 1)
+            if len(data) > MAX_BYTES:
+                raise ApiError(413, "too_large", "That photo is over 10 MB. Try a smaller one.")
+            rgbs.append(load_rgb(data))
         if engine is None:
             return {**next(mocks), "mock": True}
         with busy:
-            result = analyze(rgb, engine)
-        log.info("analyze status=%s total_ms=%s", result["status"], result["timing_ms"]["total"])
+            result = analyze_views(rgbs, engine)
+        log.info("analyze views=%d status=%s total_ms=%s", len(rgbs), result["status"], result["timing_ms"]["total"])
         return result
 
     @app.get("/api/metrics")

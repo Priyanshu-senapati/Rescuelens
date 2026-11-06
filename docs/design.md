@@ -130,6 +130,18 @@ which add noise and colour casts that uniform darkening does not. When the photo
 unknown flag, the answer reads "Low-confidence match: <model> - photo quality prevents a reliable identification"
 (still never used as an identification) instead of "Not recognised".
 
+### Several photos of one vehicle (answer to "what if the front is crushed?")
+A wreck usually still has one readable side. The rescuer can add up to two more photos (rear, an undamaged side) and
+each is analysed on its own. Class probabilities are multiplied across photos (a sum of logs, renormalised), so a
+crushed view with flat probabilities barely moves the answer while an intact rear can decide it; the unknown-car score
+comes from the most familiar-looking photo. Two guards keep this honest:
+* **Different vehicles are never merged.** If two photos each name a brand (or model family) with confidence and they
+  differ, the answer is "These photos seem to show different vehicles", powertrain unknown, treat as high-voltage.
+* **The answer says what it rests on.** A photo that was not recognised on its own is listed in the reasons ("Photo 1
+  on its own was not recognised; the answer rests on the other photos"), and each extra photo shows its own answer.
+Limit: a photo that is unreadable (no confident brand) cannot be checked against the others, so the system trusts the
+rescuer that all photos show one vehicle - the UI says so in the request.
+
 ## 7. Low-confidence handling (the safety engine)
 
 * **Hierarchy**: probabilities summed to family (e.g. "Hyundai Sonata") and make, so the system answers at the deepest

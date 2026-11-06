@@ -8,7 +8,7 @@ In development, Vite proxies `/api` to `http://localhost:8000`.
 
 ## `POST /api/analyze`
 
-`multipart/form-data`, one field: `file` (JPEG, PNG, WebP or HEIC, max 10 MB).
+`multipart/form-data`, field `file` (JPEG, PNG, WebP or HEIC, max 10 MB each). Repeat `file` up to 3 times for other sides of the **same** vehicle (e.g. crushed front + intact rear); the photos are combined into one answer and the first photo with a vehicle is the one the box, steps and comparison refer to.
 
 ### 200 response
 
@@ -32,6 +32,7 @@ In development, Vite proxies `/api` to `http://localhost:8000`.
 | `features` | `{dominant_colours:[{hex, name, share}], aspect_ratio, wheel_count, wheelbase_ratio}` | classical measurements |
 | `comparison` | `{classical, deep, hybrid}` each `{label, prob}`; `hybrid` also has `status` | same photo through the 3 approaches |
 | `brand_evidence` | `{whole_car, details, combined: [{make, prob}] x3, weight, conflict}` or `null` | brand votes from the whole-car classifier (summed per make) and the close-up expert (badge, grille, lights); `combined` drives the answer; `conflict` = the two experts' top brands differ. `null` without the expert (and in offline mode) |
+| `views` | `[{index, vehicle_found, top, prob, unknown_score, quality_issues}]` | what each photo said on its own, in upload order (one entry for a single photo). Absent in offline mode |
 | `timing_ms` | `{detect, classify, classical, total}` | latency |
 | `disclaimer` | string | always shown |
 
@@ -59,7 +60,8 @@ In development, Vite proxies `/api` to `http://localhost:8000`.
 | code | HTTP | when |
 |---|---|---|
 | `not_image` | 400 | file isn't a readable image |
-| `too_large` | 413 | over 10 MB |
+| `too_large` | 413 | a photo is over 10 MB |
+| `too_many_files` | 400 | more than 3 `file` fields |
 | `missing_file` | 400 | no `file` field |
 | `internal` | 500 | anything else (message is safe to show) |
 

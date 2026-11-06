@@ -83,6 +83,8 @@ export default function ResultPanel({ result: r }: { result: Result }) {
     ? { ...STATUS.unknown, title: "Low confidence", chip: "bg-warn", note: "The photo's quality, not the vehicle, is the problem. Don't use this answer for rescue decisions." }
     : STATUS[r.status];
   const depth = DEPTH[r.resolved_level];
+  // photos that said nothing on their own: the answer then rests on the others, so say so where the verdict is
+  const unread = (r.views ?? []).filter((v) => r.views!.length > 1 && (!v.vehicle_found || (v.unknown_score ?? 0) > (r.unknown?.threshold ?? 1)));
   return (
     <div className="space-y-4">
       {r.mock && (
@@ -107,6 +109,13 @@ export default function ResultPanel({ result: r }: { result: Result }) {
         {r.status === "unknown" && r.prediction && (
           <p className="mt-3 text-ink-soft">
             Closest of the 196 known models: <s>{r.prediction.label}</s> ({pct(r.prediction.confidence)}), not used.
+          </p>
+        )}
+        {r.status !== "unknown" && unread.length > 0 && (
+          <p className="mt-3 rounded-md border border-warn bg-[#fbf4e6] px-3 py-2 font-medium">
+            {unread.map((v) => `Photo ${v.index + 1}`).join(" and ")} {unread.length > 1 ? "were" : "was"} not recognised on its
+            own, so this answer comes from the other photo{r.views!.length - unread.length > 1 ? "s" : ""}. Check that every photo
+            shows the same vehicle.
           </p>
         )}
       </div>

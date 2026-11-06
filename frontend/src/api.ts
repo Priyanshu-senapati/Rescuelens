@@ -32,11 +32,18 @@ async function mockResult(name: string): Promise<Result> {
   return { ...(mod.default as unknown as Result), mock: true };
 }
 
-export async function analyze(photo: Blob, name: string, signal?: AbortSignal): Promise<Result> {
+/** `extra`: up to 2 more photos of the same vehicle (another side). Offline answers use the first photo only. */
+export async function analyze(
+  photo: Blob,
+  name: string,
+  signal?: AbortSignal,
+  extra: { blob: Blob; name: string }[] = [],
+): Promise<Result> {
   if (MOCK) return mockResult(name);
   if (!navigator.onLine && (await offlineReady())) return answerOnDevice(photo);
   const body = new FormData();
   body.append("file", photo, name);
+  for (const x of extra) body.append("file", x.blob, x.name);
   // one controller + timer instead of AbortSignal.any/timeout, which older iPhones (iOS < 17.4) lack
   const ctrl = new AbortController();
   let timedOut = false;

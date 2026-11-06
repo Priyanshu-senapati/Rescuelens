@@ -119,6 +119,8 @@ and update the "Run it" section of the README. (Decide as a team; it makes the m
    + high-voltage banner + official guide.
 4. (1:20-1:50) Stress test on the clear BMW: press "Sweep occlusion". It holds, then flips to "Not recognised" and the warning comes on (best tested story). Say "slider", not "% hidden".
 5. (1:50-2:20) Judge's own photo (likely an Indian car) -> "Not recognised, treat as possibly high-voltage". A Mahindra Thar may come back as a confident Jeep Wrangler: own it, and say this is why the app insists on VIN or plate.
+   If asked about wrecks: "Add another side" with a rear photo. To prove photos are never blindly merged, add
+   `/samples/night.jpg` (an Audi) to the clear BMW: "These photos seem to show different vehicles".
 6. (2:20-2:50) Model report: 94.55% top-1, crop +2.9 points, INT8 3.5x smaller, 1.15% missed hybrids, 58 of 60 unknown cars caught.
    Live camera goes into step 4 if the phone and venue connection allow it (see `docs/field-kit.md` section 5).
 7. (2:50-3:00) "Most classifiers are built to be right; RescueLens is built to know when being wrong is dangerous."
@@ -197,6 +199,8 @@ Rules: never evaluate on the test split while choosing settings (use val); keep 
 - Close look-alikes: 5 of 8 new Mahindra Thar photos were identified as Jeep Wrangler at 65-99% with no warning (7 Nov, live model).
 - Stanford Cars stops at 2012 and is US-market only; newer/Indian cars are flagged unknown (96.7% of the time on 60 photos), not identified.
 - No crashed vehicles in the data; robustness is measured with simulated darkness, haze, blur, low resolution and occlusion.
+  On 48 real crash photos it declined 44 and gave 1 confident wrong answer. Answer for the viva: the rescuer adds another
+  side ("Add another side", up to 3 photos); photos are combined, and photos of two different cars are flagged, not merged.
 - Severe blur (40% top-1), very low resolution (53%) and heavy occlusion (66%) are the real weak spots.
 - The classical-feature fusion weight came out 0 on validation: the hybrid gain comes from the detector crop (+2.9 points),
   calibration and the safety rules, not from mixing in the classical classifier.

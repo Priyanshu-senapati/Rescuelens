@@ -71,7 +71,18 @@ export interface Result {
   disclaimer: string;
   mock?: boolean;
   brand_evidence?: BrandEvidence | null; // absent in offline mode (the close-up expert runs on the server only)
+  views?: ViewSummary[]; // one per photo sent; absent in offline mode
   offline?: boolean;
+}
+
+/** What one photo said on its own, before the photos were combined. */
+export interface ViewSummary {
+  index: number;
+  vehicle_found: boolean;
+  top: string | null;
+  prob: number | null;
+  unknown_score: number | null;
+  quality_issues: string[];
 }
 
 export interface MakeVote {
