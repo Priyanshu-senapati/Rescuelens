@@ -16,7 +16,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const out = resolve(here, "../demo-output");
 mkdirSync(out, { recursive: true });
 const feed = join(out, "feed.mjpeg");
-copyFileSync(resolve(here, "../public/samples/clear.jpg"), feed);
+// Chromium's fake camera only accepts some image sizes: this one works, clear.jpg comes through as a 2x2 video.
+copyFileSync(resolve(here, "../public/samples/sonata-hybrid.jpg"), feed);
 
 const browser = await chromium.launch({
   args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream", `--use-file-for-fake-video-capture=${feed.replaceAll("\\", "/")}`],
@@ -82,13 +83,20 @@ await page.getByRole("button", { name: "See the full answer" }).waitFor({ timeou
 await wait(9);
 await page.getByRole("button", { name: "See the full answer" }).click();
 await answer();
+await again();
+await sample(/Clear daylight/);
 
 await page.getByRole("heading", { name: "Stress test" }).scrollIntoViewIfNeeded();
-await caption("Automatic sweep: the real model at 8 rising levels of blur");
-await page.getByRole("button", { name: "Sweep blur" }).click();
-await page.getByRole("status").filter({ hasText: /Held|Still/ }).waitFor({ timeout: 90_000 });
+await caption("Automatic sweep: the real model at 8 rising levels of occlusion");
+await page.getByRole("button", { name: "Sweep occlusion" }).click();
+const curve = page.getByRole("img", { name: /Usable confidence/ });
+await curve.waitFor({ timeout: 30_000 });
+await curve.evaluate((el) => el.scrollIntoView({ behavior: "smooth", block: "center" })); // keep the curve in shot as it grows
+const verdict = page.getByRole("status").filter({ hasText: /Held|Still/ });
+await verdict.waitFor({ timeout: 90_000 });
+await verdict.evaluate((el) => el.scrollIntoView({ behavior: "smooth", block: "center" }));
 await caption("It says exactly where the answer breaks");
-await wait(8);
+await wait(9);
 await again();
 
 await caption("A car it has never seen: it says so instead of guessing");
