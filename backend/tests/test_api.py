@@ -91,3 +91,19 @@ def test_offline_files_are_off_by_default_then_whitelisted(tmp_path, monkeypatch
 def test_valid_photo_returns_a_result():
     r = client.post("/api/analyze", files={"file": ("car.png", png_bytes(), "image/png")})
     assert r.status_code == 200 and r.json()["status"] in {"identified", "ambiguous", "unknown", "no_vehicle"}
+
+
+def test_dark_photo_gets_a_second_opinion_from_a_contrast_boosted_copy():
+    calls = []
+
+    def counting_classifier(crop):
+        calls.append(float(crop.mean()))
+        return sonata_classifier(crop)
+
+    dark = (car_photo() * 0.1).astype(np.uint8)
+    eng = Engine(detector=lambda rgb: [((100, 150, 500, 330), 0.9)], classifier=counting_classifier, baseline=None,
+                 classes=CLASSES, thresholds=Thresholds())
+    out = analyze(dark, eng)
+    assert len(calls) == 3                                  # crop, boosted crop, whole photo (comparison panel)
+    assert calls[1] > calls[0]                              # the second pass really is brighter
+    assert any("contrast-boosted" in x for x in out["reliability"]["reasons"])

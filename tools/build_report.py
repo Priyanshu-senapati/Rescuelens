@@ -68,6 +68,8 @@ def main() -> None:
     rob = {(r["condition"], r["severity"]): r["top1"] for r in m["robustness"]}
     unk_path = a.out / "unknown_eval.json"           # from tools/eval_unknown.py, if it was run
     unk = json.loads(unk_path.read_text()) if unk_path.exists() else {}
+    brand_path = a.out / "brand_metrics.json"         # from training/train_brand_parts.py, if trained
+    brand = json.loads(brand_path.read_text()) if brand_path.exists() else None
 
     public = {
         "classification": {"top1": c["top1"], "top5": c["top5"], "top1_no_crop": c["top1_no_crop"], "top1_tta": c["top1_tta"]},
@@ -89,6 +91,7 @@ def main() -> None:
         "risk_coverage": m["risk_coverage"],
         "top_confusions": m["top_confusions"][:10],
         "fusion": fusion,
+        "brand_experts": brand,
     }
     a.out.mkdir(parents=True, exist_ok=True)
     (a.out / "metrics_public.json").write_text(json.dumps(public, indent=1))
@@ -163,6 +166,15 @@ def main() -> None:
         f"| + flip TTA | {pct(c['top1_tta'])} |",
         f"| FP32 instead of INT8 (subset) | {pct(e['fp32_top1_subset'])} vs {pct(e['int8_top1_subset'])} |",
         "",
+        *([
+            "## Brand experts (make accuracy, 49 brands)",
+            f"Whole-car classifier summed per brand vs a close-up expert that votes over 9 zoomed windows (badge, grille, "
+            f"lights); combined with the {brand['fusion_rule']} rule, weight {brand['fusion_weight']:.1f} (chosen on validation, clean + occluded).",
+            "", "| Condition | Whole car | Close-ups | Combined |", "|---|---|---|---|",
+            f"| Clean test ({brand['test_clean']['n']}) | {pct(brand['test_clean']['whole'])} | {pct(brand['test_clean']['parts'])} | {pct(brand['test_clean']['fused'])} |",
+            f"| 30% of the vehicle hidden ({brand['test_occluded_30']['n']}) | {pct(brand['test_occluded_30']['whole'])} | {pct(brand['test_occluded_30']['parts'])} | {pct(brand['test_occluded_30']['fused'])} |",
+            "",
+        ] if brand else []),
         "## Most-confused classes (failure-case candidates)",
         "| True | Predicted | Count |", "|---|---|---|",
         *[f"| {t['true']} | {t['predicted']} | {t['count']} |" for t in m["top_confusions"][:10]],

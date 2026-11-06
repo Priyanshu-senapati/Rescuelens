@@ -78,7 +78,10 @@ function BrandPanel({ e }: { e: BrandEvidence }) {
 }
 
 export default function ResultPanel({ result: r }: { result: Result }) {
-  const st = STATUS[r.status];
+  const lowConfidence = r.status === "unknown" && r.headline.startsWith("Low-confidence match");
+  const st = lowConfidence
+    ? { ...STATUS.unknown, title: "Low confidence", chip: "bg-warn", note: "The photo's quality, not the vehicle, is the problem. Don't use this answer for rescue decisions." }
+    : STATUS[r.status];
   const depth = DEPTH[r.resolved_level];
   return (
     <div className="space-y-4">

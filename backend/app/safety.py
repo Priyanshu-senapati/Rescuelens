@@ -120,8 +120,12 @@ def decide(probs: np.ndarray, unknown_score: float, classes: list[CarClass], t: 
 
     if unknown:
         status, level = "unknown", "none"
-        headline = ("Not recognised - damaged, unusual or not one of the 196 supported models" if is_ood
-                    else "Cannot identify this vehicle with enough confidence")
+        if is_ood and quality_issues and p_make >= t.make:     # the photo, not the car, is the likely problem
+            headline = f"Low-confidence match: {top.label} - photo quality prevents a reliable identification"
+        elif is_ood:
+            headline = "Not recognised - damaged, unusual or not one of the 196 supported models"
+        else:
+            headline = "Cannot identify this vehicle with enough confidence"
     elif p_top >= t.identify:
         status, level, headline = "identified", "vehicle", top.label
     elif p_family >= t.family:

@@ -96,7 +96,7 @@ function argmax(p: Float32Array | number[]): number {
 
 type Decision = Pick<Result, "status" | "headline" | "resolved_level" | "prediction" | "hierarchy" | "top5" | "safety" | "unknown" | "reliability" | "disclaimer">;
 
-export function decide(probs: Float32Array | number[], unknownScore: number, classes: CarClass[], t: Thresholds): Decision {
+export function decide(probs: Float32Array | number[], unknownScore: number, classes: CarClass[], t: Thresholds, qualityIssues: string[] = []): Decision {
   const order = classes.map((_, i) => i).sort((a, b) => probs[b] - probs[a]);
   // brand first (same rule as safety.py): summed make, then the strongest family in it, then its likeliest vehicle
   const makeP = new Map<string, number>();
@@ -126,7 +126,9 @@ export function decide(probs: Float32Array | number[], unknownScore: number, cla
   if (unknown) {
     status = "unknown";
     level = "none";
-    headline = isOod ? "Not recognised - damaged, unusual or not one of the 196 supported models" : "Cannot identify this vehicle with enough confidence";
+    headline = isOod && qualityIssues.length > 0 && pMake >= t.make
+      ? `Low-confidence match: ${top.label} - photo quality prevents a reliable identification`
+      : isOod ? "Not recognised - damaged, unusual or not one of the 196 supported models" : "Cannot identify this vehicle with enough confidence";
   } else if (pTop >= t.identify) {
     status = "identified";
     level = "vehicle";

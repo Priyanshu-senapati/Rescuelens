@@ -117,3 +117,14 @@ def test_spread_out_probabilities_are_explained():
     p = probs(**{"Audi S5 Coupe 2012": 0.2, "Audi A5 Coupe 2012": 0.18, "Audi S4 Sedan 2012": 0.17})
     reasons = decide(p, 0.2, CLASSES, T)["reliability"]["reasons"]
     assert any("No single model stands out" in x for x in reasons)
+
+
+def test_night_photo_of_a_known_car_is_a_low_confidence_match_not_unrecognised():
+    p = probs(**{"Ferrari California Convertible 2012": 0.41, "Ferrari 458 Italia Coupe 2012": 0.12,
+                 "Ferrari FF Coupe 2012": 0.08})
+    r = decide(p, 0.9, CLASSES, T, ["Low light"])            # flagged as unusual, but the photo is the reason
+    assert r["status"] == "unknown"                         # still never used as an identification
+    assert r["headline"].startswith("Low-confidence match: Ferrari California Convertible 2012")
+    assert r["safety"]["hv_warning"] is True and r["safety"]["level"] == "caution"
+    plain = decide(p, 0.9, CLASSES, T)                       # same evidence, good photo -> genuinely not recognised
+    assert plain["headline"].startswith("Not recognised")

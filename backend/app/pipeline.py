@@ -23,9 +23,7 @@ class Engine:
     baseline: Callable[[np.ndarray], np.ndarray] | None
     classes: list[CarClass]
     thresholds: Thresholds
-    # measured: CLAHE before the classifier cost 0.3-0.5 points on dark test photos (training already darkens
-    # images), so it is off; CLAHE still drives the detector retry and the pipeline visuals
-    clahe_when_dark: bool = False
+    night_dual_pass: bool = True             # dark photos: also classify a CLAHE-boosted copy and average the two
     brand: Callable[[np.ndarray], np.ndarray] | None = None   # close-up brand expert: car crop -> make probabilities
     brand_makes: tuple[str, ...] = ()
     brand_weight: float = 0.0                                  # share of the close-up vote, chosen on validation
@@ -100,9 +98,12 @@ def analyze(rgb: np.ndarray, eng: Engine) -> dict:
     t_cl = time.perf_counter()
 
     car = classical.crop(rgb, box)
-    dark = cl["quality"]["brightness"] < 30
-    hybrid_input = classical.crop(classical.enhance(rgb), box) if dark and eng.clahe_when_dark else car
-    probs, unknown_score = eng.classifier(hybrid_input)
+    probs, unknown_score = eng.classifier(car)
+    night = None
+    if eng.night_dual_pass and cl["quality"]["brightness"] < 30:   # low light: second opinion from a boosted copy
+        p_boost, u_boost = eng.classifier(classical.crop(classical.enhance(rgb), box))
+        night = (float(probs.max()), float(((probs + p_boost) / 2).max()))
+        probs, unknown_score = (probs + p_boost) / 2, min(unknown_score, u_boost)
     deep_probs, _ = eng.classifier(rgb)      # plain deep learning: whole photo, no crop, no enhancement
     brand_evidence = None
     if eng.brand is not None:                # second expert: zoomed windows (badge, grille, lights) vote on the brand
@@ -114,6 +115,9 @@ def analyze(rgb: np.ndarray, eng: Engine) -> dict:
     t_clf = time.perf_counter()
 
     decision = decide(probs, unknown_score, eng.classes, eng.thresholds, cl["quality"]["issues"])
+    if night:
+        decision["reliability"]["reasons"].append(
+            f"Low light: also read a contrast-boosted copy (top answer {night[0]:.0%} -> {night[1]:.0%})")
     if brand_evidence and brand_evidence["conflict"]:
         decision["reliability"]["reasons"].append(
             f"Close-up details point to {brand_evidence['details'][0]['make']}, the whole-car view to {brand_evidence['whole_car'][0]['make']}")
