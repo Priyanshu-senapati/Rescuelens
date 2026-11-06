@@ -2,8 +2,12 @@
 
 Uncertainty-aware vehicle identification for crash response (Computer Vision Hackathon 2026, P5).
 
-Photo of a vehicle -> detect it -> identify make / model / year (196 Stanford Cars classes) ->
+Photo or live camera -> detect the vehicle -> identify make / model / year (196 Stanford Cars classes) ->
 decide what is safe to conclude: **identified**, **ambiguous** (e.g. hybrid can't be ruled out) or **unknown**.
+Point a phone at a car and the answer locks in once 3 frames agree; a high-voltage warning shows at once, with where the battery
+and cables are, from the manufacturer's guide.
+
+![Architecture](docs/architecture.png)
 
 ## Results (official Stanford Cars test split, 8,041 images)
 
@@ -27,7 +31,7 @@ Full tables (robustness, ablation, thresholds, failure cases): [`eval_P5_T50.md`
 | `data/` | class names, high-voltage class list |
 | `docs/` | API contract, fixtures, design doc |
 
-**Build plan / handover (pending work, dropped features): [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md)** · Design document + architecture diagram: [docs/design.md](docs/design.md) · API: [docs/api-contract.md](docs/api-contract.md) · Evaluation: `eval_P5_T50.md`
+**Build plan / handover (pending work, dropped features): [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md)** · Jobs for people, not code: [docs/field-kit.md](docs/field-kit.md) · Viva sheets: [docs/viva/](docs/viva/) · High-voltage sources: [docs/hazard-sources.md](docs/hazard-sources.md) · Design document + architecture diagram: [docs/design.md](docs/design.md) · API: [docs/api-contract.md](docs/api-contract.md) · Evaluation: `eval_P5_T50.md`
 
 ## Run it
 
@@ -39,6 +43,10 @@ docker run -p 7860:7860 rescuelens          # open http://localhost:7860
 Without `MODEL_BASE_URL` the app starts in mock mode (fixture responses), which is handy for UI work.
 
 Back-end tests: `cd backend && pip install -r requirements.txt -r requirements-dev.txt && pytest`
+
+Browser tests: `cd frontend && npm ci && npx playwright install chromium && npm test`. CI runs both on every push.
+
+Pre-test the demo samples on the real models: `python tools/check_samples.py`
 
 ## Reproduce the numbers
 

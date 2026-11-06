@@ -18,6 +18,18 @@ by number plate, VIN, QR code or manual search. At a crash those can be missing,
 
 **RescueLens identifies the vehicle from how it looks, and - more importantly - says when it is not sure.**
 
+### Why this matters in India
+
+* **Road crashes:** 4,80,583 accidents, 1,72,890 deaths and 4,62,825 injuries in 2023, about 20 deaths every hour, up 4.2% in accidents
+  and 2.6% in deaths on 2022 (MoRTH, *Road Accidents in India 2023*: [report copy](https://data.opencity.in/dataset/road-accidents-in-india-2023), [PTI summary](https://www.theweek.in/wire-updates/business/2025/08/28/del82-biz-road-accidents-report.html)).
+* **More high-voltage vehicles on the road:** EV registrations went from 1.74 lakh in FY 2019-20 to 19.68 lakh in FY 2024-25, more than
+  11x ([Lok Sabha Unstarred Question 2913, 10 March 2026, source: Vahan](https://heavyindustries.gov.in/sites/default/files/2026-03/lsauq_2913_0.pdf)).
+* **EV share:** about 23 lakh EVs in 2025, 8% of all new registrations ([All India Radio, citing Vahan](https://newsonair.gov.in/indias-electric-vehicle-market-accounts-for-8-of-new-vehicle-registrations-in-2025-vahan-portal-data/)).
+  Most are two- and three-wheelers, which our 196 car classes don't cover. For cars specifically, FADA reports electric passenger
+  vehicle retail sales up about 77% in 2025 ([Free Press Journal](https://www.freepressjournal.in/business/ev-retail-sales-jump-16-in-2025-on-77-surge-in-electric-car-demand-fada)).
+* **Responders are exposed to this risk:** the US NTSB studied the risks lithium-ion battery fires pose to emergency responders ([Safety Report SR-20/01](https://www.ntsb.gov/safety/safety-studies/Documents/SR2001.pdf)). We did
+  not find a comparable Indian count of EV or hybrid rescue incidents, so we don't claim one.
+
 ## 2. Goals and non-goals
 
 | Goals | Non-goals |
@@ -30,9 +42,11 @@ by number plate, VIN, QR code or manual search. At a crash those can be missing,
 
 ## 3. Architecture
 
+![RescueLens architecture](architecture.png)
+
 ```mermaid
 flowchart LR
-    U[Photo upload<br/>phone or laptop] --> V[Validate + EXIF rotate<br/>+ downscale]
+    U[Photo upload or live camera frame<br/>phone or laptop] --> V[Validate + EXIF rotate<br/>+ downscale]
     V --> D[YOLO11s detector<br/>ONNX, car/bus/truck]
     D -- no vehicle --> D2[Retry on CLAHE-enhanced photo]
     D2 -- still none --> NV[status: no_vehicle]
@@ -48,7 +62,7 @@ flowchart LR
     K --> S
     C -- quality issues --> S
     S --> O[identified / ambiguous / unknown<br/>+ high-voltage advice]
-    O --> UI[React UI]
+    O --> UI[React UI<br/>live mode locks when 3 frames agree]
     B --> UI
 ```
 
@@ -60,7 +74,7 @@ flowchart LR
 | Classical baseline | `backend/app/models.py::Baseline` | Numpy re-implementation of the trained scaler -> PCA -> logistic regression | `baseline.npz` |
 | Safety engine | `backend/app/safety.py` | Hierarchy (make -> family -> vehicle), 3 result states, summed high-voltage probability, actions | `data/hazards.json` |
 | Pipeline / API | `backend/app/pipeline.py`, `main.py` | Orchestration, timing, errors, mock mode, serves UI | all of the above |
-| UI | `frontend/` | Upload / camera, result, pipeline steps, stress test, comparison dashboard | `docs/api-contract.md` |
+| UI | `frontend/` | Upload, live camera with stable lock (`frontend/src/live/`), result, pipeline steps, stress test, comparison dashboard, crash screen | `docs/api-contract.md` |
 | Training | `training/` | Classifier training + all metrics; detector eval + classical baseline | Stanford Cars |
 
 ## 4. Data
@@ -135,9 +149,9 @@ high-voltage miss / false-alarm rates, classical vs deep vs hybrid, ablation, mo
 
 ## 10. Deployment
 
-One Docker image (React build + FastAPI + ONNX Runtime) on Hugging Face Spaces (2 vCPU, 16 GB). GitHub `main` is
-mirrored to the Space by a GitHub Action. Model files live in the `rescuelens-models` repo and are fetched at build
-time. Inputs are validated (type, 10 MB limit, decompression-bomb guard, EXIF rotation, HEIC); errors return a JSON
+One always-warm container on Modal (2 CPUs, 2 GB) runs the React build, FastAPI and ONNX Runtime (`modal_app.py`); a `Dockerfile`
+runs the same app on any Docker host. GitHub Actions runs the back-end tests, type check, build and browser tests on every push.
+Inputs are validated (type, 10 MB limit, decompression-bomb guard, EXIF rotation, HEIC); errors return a JSON
 error code shown by the UI; without model files the app serves fixture responses instead of crashing.
 
 ## 11. Limitations
@@ -166,6 +180,6 @@ identification uncertainty into a safety decision.
 | Member | USN | Owns |
 |---|---|---|
 | Priyanshu Kumar Senapati | 1RUA24CSE0337 | Classifier training, calibration, safety metrics |
-| Saatwik Kumar Yadav | 1RUA24CSE0390 | (fill in) |
-| Rachana Bhaskar Gowda | 1RUA24CSE0348 | (fill in) |
-| R Muni Disnitha | 1RUA24CSE0345 | (fill in) |
+| Saatwik Kumar Yadav | 1RUA24CSE0390 | Product and UI engineering: live camera, crash handling, browser tests and CI, report page |
+| Rachana Bhaskar Gowda | 1RUA24CSE0348 | Safety content and real-world validation: official guides, responder interview, problem statistics |
+| R Muni Disnitha | 1RUA24CSE0345 | Evidence, documentation and demo: parking-lot test photos, design doc, backup video |

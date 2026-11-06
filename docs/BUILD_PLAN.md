@@ -85,7 +85,7 @@ Then set `ARG MODEL_BASE_URL="https://github.com/Priyanshu-senapati/Rescuelens/r
 and update the "Run it" section of the README. (Decide as a team; it makes the model weights public.)
 
 ### 2.4 Documentation gaps (30 min, anyone)
-- [ ] `docs/design.md` section 14: fill in each member's role (who explains what in the viva).
+- [x] `docs/design.md` section 14: roles filled in as a draft; the team must confirm who is member B and C.
 - [ ] Ask the organisers whether a specific **design-doc template** exists (the rubric mentions "every template section");
       if yes, map our sections onto it.
 - [ ] Ask the organisers which rubric weights are right (text says "others carry 15", table says 25/20/15/15/25).
@@ -101,7 +101,8 @@ and update the "Run it" section of the README. (Decide as a team; it makes the m
    + high-voltage banner + official guide.
 4. (1:20-1:50) Stress test: slide blur/hidden until the status flips to "Not certain" and the advice changes.
 5. (1:50-2:20) Judge's own photo (likely an Indian car) -> "Not recognised, treat as possibly high-voltage".
-6. (2:20-2:50) Model report: 94.2% top-1, crop +3.3 points, INT8 4x smaller, 0.9% missed hybrids, 88% unknown caught.
+6. (2:20-2:50) Model report: 94.55% top-1, crop +2.9 points, INT8 3.5x smaller, 1.15% missed hybrids, 58 of 60 unknown cars caught.
+   Live camera goes into step 4 if the phone and venue connection allow it (see `docs/field-kit.md` section 5).
 7. (2:50-3:00) "Most classifiers are built to be right; RescueLens is built to know when being wrong is dangerous."
 
 Viva questions every member should answer: why ConvNeXt + why 384 px; why YOLO pretrained (not fine-tuned); what CLAHE did
@@ -175,10 +176,10 @@ Rules: never evaluate on the test split while choosing settings (use val); keep 
 ---
 
 ## 5. Known issues and limits (put these in the viva answers)
-- Stanford Cars stops at 2012 and is US-market only; newer/Indian cars are flagged unknown (88% of the time), not identified.
+- Stanford Cars stops at 2012 and is US-market only; newer/Indian cars are flagged unknown (96.7% of the time on 60 photos), not identified.
 - No crashed vehicles in the data; robustness is measured with simulated darkness, haze, blur, low resolution and occlusion.
-- Heavy blur (44% top-1), a 40 px vehicle (55%) and 45% occlusion (62%) are the real weak spots.
-- The classical-feature fusion weight came out 0 on validation: the hybrid gain comes from the detector crop (+3.3 points),
+- Severe blur (40% top-1), very low resolution (53%) and heavy occlusion (66%) are the real weak spots.
+- The classical-feature fusion weight came out 0 on validation: the hybrid gain comes from the detector crop (+2.9 points),
   calibration and the safety rules, not from mixing in the classical classifier.
 - Decision-support prototype only; it never replaces official rescue documentation.
 
@@ -213,43 +214,43 @@ Small doc/JSON edits can be made directly on github.com (pencil icon) as a pull 
 
 ### Member A (has Claude Code) - product and UI engineering
 The UI runs without the back end: `cd frontend; npm ci; $env:VITE_MOCK="1"; npm run dev` (answers come from `docs/fixtures`).
-1. [ ] **Live camera mode** (high wow factor): a "Point camera" button that opens the rear camera (`getUserMedia`), sends a frame
+1. [x] **Live camera mode** (high wow factor): a "Point camera" button that opens the rear camera (`getUserMedia`), sends a frame
        to `/api/analyze` every ~1.5 s while the vehicle is in view, and locks the answer when the same label wins 3 frames in a row.
-2. [ ] **Demo samples**: add one pre-tested "ambiguous" sample and one "unknown car" sample (from `private_photos/unknown`, ask
+2. [x] **Demo samples** (still to pre-test on the real models: `python tools/check_samples.py`): add one pre-tested "ambiguous" sample and one "unknown car" sample (from `private_photos/unknown`, ask
        Priyanshu; Wikimedia licence: keep author + licence in `frontend/public/samples/CREDITS.md`).
-3. [ ] **Robustness of the UI**: React error boundary with a "Start again" button; Playwright test: open page -> pick a sample ->
+3. [x] **Robustness of the UI**: React error boundary with a "Start again" button; Playwright test: open page -> pick a sample ->
        result card visible (mock mode); GitHub Action that runs `pytest` (backend) + `npm run build` (frontend) on every push.
-4. [ ] **Report page additions**: high-voltage threshold table (miss rate vs false alarms at 0.05 / 0.1 / 0.2 / 0.3 / 0.5 - the
-       numbers are in `eval_P5_T50.md`, section 6) and the unknown-car result (88.3% of 60 unseen models).
-5. [ ] **Battery-location line in the high-voltage banner** once member B fills `data/hazards.json` (add `battery` and
+4. [x] **Report page additions**: high-voltage threshold table (miss rate vs false alarms at 0.05 / 0.1 / 0.2 / 0.3 / 0.5 - the
+       numbers are in `eval_P5_T50.md`, section 6) and the unknown-car result (now 96.7% with ConvNeXt-Small; ConvNeXt-Tiny's 88.3% is shown for comparison).
+5. [x] **Battery-location line in the high-voltage banner** once member B fills `data/hazards.json` (add `battery` and
        `hv_cables` text fields; show them under the banner message; update `docs/api-contract.md`).
 6. [ ] Stretch, only if 1-5 are done: **offline mode** - run the INT8 classifier in the browser with onnxruntime-web as an
        installable PWA (rural crash sites often have no signal).
 
 ### Member B - safety content and real-world validation (no coding needed)
-1. [ ] **Official emergency response guides** for the 8 hybrid/EV classes without one in `data/hazards.json`
+1. [x] **Official emergency response guides** (done, see `docs/hazard-sources.md`) for the 8 hybrid/EV classes without one in `data/hazards.json`
        (BMW ActiveHybrid 5, Chevrolet Silverado 1500 Hybrid, Tahoe Hybrid, Malibu Hybrid, GMC Yukon Hybrid, Fisker Karma,
        Nissan Leaf, Tesla Model S - 2012 or nearest year). Only manufacturer / NFPA / Euro NCAP sources. For each, also note
        **where the HV battery and orange cables are** (e.g. "battery under rear seat, cables along the left sill") -> add as
        `battery` and `hv_cables` fields. Pull request on github.com.
-2. [ ] **Talk to a real responder** (highest impact for the pitch): message or visit a local fire station / traffic police /
+2. [ ] **Talk to a real responder** (highest impact for the pitch; script in `docs/field-kit.md`): message or visit a local fire station / traffic police /
        ambulance (108) trainer. Ask 3 questions: how do you identify a crashed car today? have you faced an EV/hybrid? would a
        photo-based check help? Get permission to quote them by role ("Station Officer, Bengaluru Fire Service"). One quote in the
        pitch beats any feature.
-3. [ ] **Numbers for the problem slide**, each with a source link: road crashes and deaths in India (MoRTH annual report), EV
+3. [x] **Numbers for the problem slide**, each with a source link: road crashes and deaths in India (MoRTH annual report), EV
        sales growth in India, any reported EV/hybrid rescue incidents. Add to `docs/design.md` section 1 with citations.
 
 ### Member C - evidence, docs and demo (no coding needed)
-1. [ ] **Own test photos**: photograph 30+ cars in the college parking (different angles, some at dusk, some partly hidden).
+1. [ ] **Own test photos** (shot list in `docs/field-kit.md`): photograph 30+ cars in the college parking (different angles, some at dusk, some partly hidden).
        These are our honest "judge-style" unseen inputs. Put them in a shared Drive folder (not git); Priyanshu runs
        `tools/eval_unknown.py` on them for a second, independent unknown-car number.
 2. [ ] **Design doc**: fill section 14 (each member's role); ask the organisers about the design-doc template and the rubric
        weights; add 3 failure-case screenshots (ambiguous stress test, Thar -> Wrangler, heavy blur) once the live URL exists.
-3. [ ] **Architecture diagram as an image** (draw.io / Excalidraw, same boxes as the mermaid diagram in `docs/design.md`) for the
+3. [x] **Architecture diagram as an image** (draw.io / Excalidraw, same boxes as the mermaid diagram in `docs/design.md`) for the
        README and any slides; export PNG to `docs/architecture.png`.
-4. [ ] **Demo backup video**: a 3-minute screen recording following the script in section 2.5 (record from the live URL or
+4. [ ] **Demo backup video** (one command once the live URL exists: `npm run demo:record`, see `docs/field-kit.md`): a 3-minute screen recording following the script in section 2.5 (record from the live URL or
        Priyanshu's laptop on Saturday morning). If the venue Wi-Fi fails, this saves the demo.
-5. [ ] **Viva sheet**: one page per member with the questions from section 2.5 and short answers; everyone rehearses their own part.
+5. [x] **Viva sheet** (`docs/viva/`, printable `viva-sheets.pdf`): one page per member with the questions from section 2.5 and short answers; everyone rehearses their own part.
 
 ### Saturday timeline
 | Time | What |

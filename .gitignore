@@ -35,3 +35,4 @@ models_*/
 # browser tests
 frontend/playwright-report/
 frontend/test-results/
+frontend/demo-output/
