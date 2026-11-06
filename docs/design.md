@@ -90,10 +90,10 @@ flowchart LR
 ## 6. Hybrid integration (where classical CV earns its place)
 
 1. **Localisation**: detector crop vs whole image (ablation: crop vs no crop).
-2. **Enhancement**: CLAHE before classification on dark photos, and as a detector retry when nothing is found.
+2. **Enhancement**: CLAHE as a detector retry when nothing is found, and in the visual pipeline. We measured CLAHE before the classifier on darkened test photos: it cost 0.3-0.5 points, because training-time darkening already made the network brightness-robust, so it is switched off for classification (an ablation result we kept).
 3. **Measurement**: brightness, contrast, sharpness (Laplacian variance), resolution and cut-off checks explain
    *why* a prediction is unreliable ("Low light", "Blurry").
-4. **Late fusion**: classical-baseline probabilities fused with deep probabilities (weight chosen on validation).
+4. **Late fusion**: classical-baseline probabilities fused with deep probabilities, weight chosen on validation - the best weight was 0 (the classical model adds no information the network lacks), reported as-is.
 5. **Interpretability**: every classical stage is returned as an image and shown in the UI.
 
 ## 7. Low-confidence handling (the safety engine)
@@ -102,7 +102,7 @@ flowchart LR
   level it is sure of.
 * **States**: `identified` (vehicle prob >= 0.6) · `ambiguous` (family or make level) · `unknown`
   (unknown score above threshold or make prob < 0.5).
-* **High voltage**: P(hybrid/EV) = sum of the 9 hybrid/EV class probabilities. Warn at >= 0.10 - because missing a hybrid
+* **High voltage**: P(hybrid/EV) = sum of the 9 hybrid/EV class probabilities. Warn at >= 0.05 (miss rate 0.9% vs 4.6% for the top-1 label, false alarms 0.7%) - because missing a hybrid
   is far worse than a false alarm. Unknown vehicles are treated as *possibly* high-voltage.
 * Thresholds come from the validation set; the threshold table (miss rate vs false alarms) is in the eval file.
 

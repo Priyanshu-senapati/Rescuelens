@@ -42,7 +42,7 @@ QUICK = os.environ.get("QUICK", "1") != "0"
 MODEL_NAME = os.environ.get("MODEL_NAME", "convnext_tiny.fb_in22k_ft_in1k_384")
 IMG = 384
 EPOCHS = 1 if QUICK else int(os.environ.get("EPOCHS", 25))
-BATCH = 32
+BATCH = int(os.environ.get("BATCH", 32))
 LR = 2e-4
 WEIGHT_DECAY = 0.05
 LABEL_SMOOTHING = 0.1
@@ -312,7 +312,7 @@ def main():
                         test_labels=te_labels, test_full_logits=tf_logits, test_emb=te_emb, test_unknown=te_unk)
     (EXPORT / "config.json").write_text(json.dumps({
         "model_name": MODEL_NAME, "img": IMG, "mean": mean, "std": std, "class_names": class_names,
-        "temperature": temp, "knn_k": knn_k, "unknown_threshold": unknown_threshold, "hv_threshold": 0.1,
+        "temperature": temp, "knn_k": knn_k, "unknown_threshold": unknown_threshold, "hv_threshold": 0.05,
         "use_int8": use_int8, "quick": QUICK}, indent=1))
     (EXPORT / "metrics.json").write_text(json.dumps(M, indent=1))
     for f in sorted(EXPORT.iterdir()):

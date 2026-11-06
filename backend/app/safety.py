@@ -33,7 +33,7 @@ class Thresholds:
     identify: float = 0.6    # top class prob needed to name the exact vehicle
     family: float = 0.6      # family prob needed to name the family
     make: float = 0.5        # below this the model has no real idea -> unknown
-    hv: float = 0.1          # summed hybrid/EV prob that triggers the high-voltage warning
+    hv: float = 0.05         # summed hybrid/EV prob that triggers the high-voltage warning (chosen on miss vs false-alarm table)
     unknown: float = 0.5     # unknown-car score threshold (set from training config)
 
 

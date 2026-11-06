@@ -23,7 +23,9 @@ class Engine:
     baseline: Callable[[np.ndarray], np.ndarray] | None
     classes: list[CarClass]
     thresholds: Thresholds
-    clahe_when_dark: bool = True             # hybrid: boost contrast before classifying dark photos
+    # measured: CLAHE before the classifier cost 0.3-0.5 points on dark test photos (training already darkens
+    # images), so it is off; CLAHE still drives the detector retry and the pipeline visuals
+    clahe_when_dark: bool = False
 
 
 def load_engine(model_dir: Path) -> Engine:

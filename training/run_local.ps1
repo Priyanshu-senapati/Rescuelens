@@ -8,7 +8,7 @@ if (-not $env:EXPORT_DIR) { $env:EXPORT_DIR = "models" }   # override to keep a 
 $env:CACHE_DIR = "training/.cache"
 $env:QUICK = $Quick
 $env:EVAL_ONLY = $EvalOnly
-$log = "training\" + [IO.Path]::GetFileNameWithoutExtension($Script) + ".log"
+$log = "training\" + [IO.Path]::GetFileNameWithoutExtension($Script) + "_" + $env:EXPORT_DIR + ".log"
 $p = Start-Process -FilePath "$root\training\.venv\Scripts\python.exe" -ArgumentList "-u", "training\$Script" `
     -WorkingDirectory $root -RedirectStandardOutput $log -RedirectStandardError "$log.err" -WindowStyle Hidden -PassThru
 Write-Output "started $Script (pid $($p.Id)) -> $log"
