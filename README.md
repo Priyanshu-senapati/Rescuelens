@@ -1,13 +1,3 @@
----
-title: RescueLens
-emoji: 🚒
-colorFrom: red
-colorTo: gray
-sdk: docker
-app_port: 7860
-pinned: false
----
-
 # RescueLens
 
 Uncertainty-aware vehicle identification for crash response (Computer Vision Hackathon 2026, P5).
