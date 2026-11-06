@@ -1,3 +1,13 @@
+---
+title: RescueLens
+emoji: 🚒
+colorFrom: red
+colorTo: gray
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # RescueLens
 
 Uncertainty-aware vehicle identification for crash response (Computer Vision Hackathon 2026, P5).
@@ -14,3 +24,14 @@ decide what is safe to conclude: **identified**, **ambiguous** (e.g. hybrid can'
 | `docs/` | API contract, fixtures, design doc |
 
 API: [docs/api-contract.md](docs/api-contract.md)
+
+## Run it
+
+```bash
+docker build -t rescuelens --build-arg MODEL_BASE_URL=https://huggingface.co/<user>/rescuelens-models/resolve/main .
+docker run -p 7860:7860 rescuelens          # open http://localhost:7860
+```
+
+Without `MODEL_BASE_URL` the app starts in mock mode (fixture responses), which is handy for UI work.
+
+Back-end tests: `cd backend && pip install -r requirements.txt -r requirements-dev.txt && pytest`
