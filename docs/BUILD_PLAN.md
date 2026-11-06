@@ -73,7 +73,9 @@ back. Work top to bottom: section 2 is the critical path to a valid submission.
    `models\metrics.json -> efficiency`.
 6. Commit + push.
 
-### 2.2 Deploy the live URL on Modal (20 min)
+### 2.2 Deploy the live URL on Modal (DONE Fri 22:25: https://priyanshu-senapati--rescuelens-web.us-east.modal.run)
+Redeploy after any model/UI change: `cd frontend; npm run build; cd ..; training\.venv\Scripts\modal.exe deploy modal_app.py` (~30 s).
+
 Hugging Face now requires PRO for Docker/Gradio Spaces, so we host on Modal (free $30/month credit, no card).
 1. Sign up at modal.com with GitHub (account owner: Priyanshu).
 2. Log in once on the laptop: `training\.venv\Scripts\modal.exe setup` (opens the browser, saves a token in your user folder).
