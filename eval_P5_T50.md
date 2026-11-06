@@ -103,6 +103,21 @@ Fusion weight on classical probabilities (chosen on validation): 0.0.
 | + flip TTA | 94.70% |
 | FP32 instead of INT8 (subset) | 93.67% vs 93.67% |
 
+## Brand experts (make accuracy, 49 brands)
+Whole-car classifier summed per brand vs a close-up expert that votes over 9 zoomed windows (badge, grille, lights); combined with the product rule, weight 0.2 (chosen on validation, clean + occluded).
+
+| Condition | Whole car | Close-ups | Combined |
+|---|---|---|---|
+| Clean test (8041) | 98.30% | 96.41% | 98.61% |
+| 30% of the vehicle hidden (2000) | 90.75% | 70.05% | 92.05% |
+
+## Real crash photos (honest stress test)
+48 photos of crashed / damaged vehicles from Wikimedia Commons (brand known from the title; most are models or years outside the 196 classes). The point is behaviour under damage, not accuracy:
+
+- declined to identify (status unknown): 44 of 48
+- confident identifications: 3, of which wrong: 1
+- brand right (whole car / with close-up expert): 22.92% / 22.92%
+
 ## Most-confused classes (failure-case candidates)
 | True | Predicted | Count |
 |---|---|---|

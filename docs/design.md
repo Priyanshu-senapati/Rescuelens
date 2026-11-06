@@ -109,6 +109,27 @@ flowchart LR
 4. **Late fusion**: classical-baseline probabilities fused with deep probabilities, weight chosen on validation - the best weight was 0 (the classical model adds no information the network lacks), reported as-is.
 5. **Interpretability**: every classical stage is returned as an image and shown in the UI.
 
+### Two experts on the brand (added after a live test on a damaged Audi)
+A crashed Audi S4 photographed on a phone came out as "BMW 3 Series, 16%" although the Audi badge was visible: the
+whole-car network spreads its belief over look-alike body shapes, and the badge is a few pixels at 384 px. Two fixes:
+1. **Brand-first decision** (`backend/app/safety.py`): the brand is the one with the most *summed* probability
+   (Audi S5 + S4 + A5 ... together), then the strongest family inside it, then the likeliest model; a lone top-1 guess
+   can no longer overrule the combined evidence, and the app says so ("the single top guess ... is not an Audi").
+2. **Close-up brand expert** (`training/train_brand_parts.py`): a second ConvNeXt-Tiny trained only on zoomed-in parts
+   (random 6-35 % windows of the car: badge, grille, lights) to predict the brand (49 classes). In the app it votes over
+   nine fixed half-size windows; its vote is combined with the whole-car brand totals by a product rule
+   (whole^0.8 x close-ups^0.2, rule and weight chosen on validation photos, clean and 30 %-occluded counted equally).
+   Brand accuracy: clean 98.30 % -> **98.61 %**, 30 % occluded 90.75 % -> **92.05 %**. The "Brand evidence" panel
+   shows both votes and flags a conflict.
+
+### Night photos: a second opinion from a contrast-boosted copy
+When the vehicle crop is dark (brightness < 30/100), the classifier also reads a CLAHE-boosted copy and the two
+probability vectors are averaged (the unknown-car score takes the more in-distribution of the two). On artificially
+darkened test photos this is neutral to +0.5 points (night 90.5 % -> 91.0 %), so it can only help on real night photos,
+which add noise and colour casts that uniform darkening does not. When the photo quality, not the car, triggers the
+unknown flag, the answer reads "Low-confidence match: <model> - photo quality prevents a reliable identification"
+(still never used as an identification) instead of "Not recognised".
+
 ## 7. Low-confidence handling (the safety engine)
 
 * **Hierarchy**: probabilities summed to family (e.g. "Hyundai Sonata") and make, so the system answers at the deepest
@@ -150,6 +171,11 @@ high-voltage miss / false-alarm rates, classical vs deep vs hybrid, ablation, mo
    **96.7%** were answered "unknown" (58 of 60) while 8.3% of known test cars are wrongly flagged. The two misses are
    look-alikes: Mahindra Thar taken for Jeep Wrangler (the Thar is styled on it) and Renault Kwid for Nissan Juke.
    (ConvNeXt-Tiny caught 88.3% and also mistook Tesla Model Y for Model S - with the high-voltage warning still firing.)
+
+8. **Real crashed vehicles** (48 Wikimedia Commons photos, brand known from the title, most of them models or years
+   outside the 196 classes): the brand was right only 23 % of the time - wrecks and unseen models are far outside the
+   training data - but the system **declined to identify 44 of 48** and made 1 confident wrong identification (a wrecked
+   Ford called a Chevrolet). This is the behaviour RescueLens is designed for: when it can't know, it says so.
 
 ## 10. Deployment
 

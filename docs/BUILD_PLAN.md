@@ -1,7 +1,7 @@
 # RescueLens - build plan and handover
 
 Team T50 "Clover" · P5 · **Submission deadline: Sat 7 Nov 2026, 14:00 IST** (aim to submit by 13:30; -5 points per 15 min late).
-Last updated: Fri 6 Nov 2026, 20:15 IST.
+Last updated: Sat 7 Nov 2026, 00:10 IST - fine-tuned detector, ConvNeXt-Small, brand-first decision, close-up brand expert and night dual-pass are all live.
 
 This file is the single source of truth for what is done, what is pending, and what was dropped and should be added
 back. Work top to bottom: section 2 is the critical path to a valid submission.

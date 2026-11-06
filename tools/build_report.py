@@ -70,6 +70,8 @@ def main() -> None:
     unk = json.loads(unk_path.read_text()) if unk_path.exists() else {}
     brand_path = a.out / "brand_metrics.json"         # from training/train_brand_parts.py, if trained
     brand = json.loads(brand_path.read_text()) if brand_path.exists() else None
+    crash_path = a.out / "crashed_eval.json"         # from tools/eval_crashed.py (real crash photos), if run
+    crash = json.loads(crash_path.read_text()) if crash_path.exists() else None
 
     public = {
         "classification": {"top1": c["top1"], "top5": c["top5"], "top1_no_crop": c["top1_no_crop"], "top1_tta": c["top1_tta"]},
@@ -175,6 +177,17 @@ def main() -> None:
             f"| 30% of the vehicle hidden ({brand['test_occluded_30']['n']}) | {pct(brand['test_occluded_30']['whole'])} | {pct(brand['test_occluded_30']['parts'])} | {pct(brand['test_occluded_30']['fused'])} |",
             "",
         ] if brand else []),
+        *([
+            "## Real crash photos (honest stress test)",
+            f"{crash['n']} photos of crashed / damaged vehicles from Wikimedia Commons (brand known from the title; most are "
+            "models or years outside the 196 classes). The point is behaviour under damage, not accuracy:",
+            "",
+            f"- declined to identify (status unknown): {sum(r['status'] == 'unknown' for r in crash['rows'])} of {crash['n']}",
+            f"- confident identifications: {sum(r['status'] == 'identified' for r in crash['rows'])}, of which wrong: "
+            f"{sum(r['status'] == 'identified' and r['with_expert'] != r['truth'] for r in crash['rows'])}",
+            f"- brand right (whole car / with close-up expert): {pct(crash['brand_acc_whole_only'])} / {pct(crash['brand_acc_with_expert'])}",
+            "",
+        ] if crash else []),
         "## Most-confused classes (failure-case candidates)",
         "| True | Predicted | Count |", "|---|---|---|",
         *[f"| {t['true']} | {t['predicted']} | {t['count']} |" for t in m["top_confusions"][:10]],
