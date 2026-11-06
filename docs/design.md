@@ -112,17 +112,24 @@ See `eval_P5_T50.md`: top-1/top-5, IoU, mAP@0.5 and @0.5:0.95, model size + late
 robustness under darkness / haze / blur / low resolution / occlusion, calibration (ECE), risk-coverage,
 high-voltage miss / false-alarm rates, classical vs deep vs hybrid, ablation, most-confused pairs.
 
-## 9. Failure cases
+## 9. Failure cases (from the test-set confusion counts in `eval_P5_T50.md`)
 
-1. **Same body, different powertrain**: Hyundai Sonata Sedan 2012 vs Sonata Hybrid Sedan 2012 - near-identical
-   exterior. Handled by the summed high-voltage probability instead of the top-1 label.
-2. **Same model, different generation**: e.g. Audi S4 Sedan 2007 vs 2012. The year label stands for a generation;
-   the system backs off to the family and lists both years.
-3. **Rebadged twins**: Chevrolet Express vs GMC Savana vans, Chevrolet Tahoe vs GMC Yukon hybrids - same vehicle,
-   different badge.
-4. **Out-of-distribution cars** (post-2012 or non-US models): would get a confident wrong label from softmax alone;
-   caught by the unknown score (rate reported in the eval file).
-(Final examples with images are taken from the most-confused pairs in the eval file.)
+1. **Same vehicle, different trim**: *Chevrolet Express Cargo Van 2007* taken for *Chevrolet Express Van 2007*
+   (14 test photos, the most frequent error). The two differ mainly in rear side windows, often out of frame.
+   Cause: the label distinguishes a body option, not a shape. Safety impact: none (same structure, same powertrain).
+2. **Same model, different year / generation**: *Dodge Caliber Wagon 2012* taken for the *2007* model (10),
+   *Audi V8 Sedan 1994* for *Audi 100 Sedan 1994* (10), *Audi S5 Coupe* for *Audi A5 Coupe* (9).
+   Cause: facelifts and performance trims change only grilles, bumpers and badges. Mitigation: the family-level
+   answer ("Audi A5/S5 family") is reported when the year cannot be separated.
+3. **Rebadged twins**: *Dodge Sprinter Cargo Van 2009* taken for *Mercedes-Benz Sprinter Van 2012* (8) - the same van
+   sold under two brands. A badge-level detail the network rarely sees at 384 px.
+4. **Degraded photos** (robustness table): strong blur drops top-1 to 44%, a 40 px vehicle to 55%, and hiding 45% of
+   the vehicle to 62%. The quality checks flag these photos ("Blurry", "Low resolution") so the low confidence is
+   explained rather than hidden.
+5. **Same body, different powertrain**: Hyundai Sonata Sedan vs Sonata Hybrid 2012. The summed high-voltage
+   probability cuts missed hybrids/EVs from 4.6% (top-1 label) to 0.9%.
+6. **Out-of-distribution cars** (post-2012 or non-US models): softmax alone would give a confident wrong label;
+   the embedding-distance check flags them as unknown (catch rate in the eval file).
 
 ## 10. Deployment
 
