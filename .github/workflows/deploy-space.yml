@@ -1,0 +1,19 @@
+# Every push to main is mirrored to the Hugging Face Space, which rebuilds the Docker image and redeploys.
+# Needs repository secret HF_TOKEN (Hugging Face token with write access).
+name: Deploy to Hugging Face Space
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Push to Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: git push --force "https://PriyanshuSenapati:${HF_TOKEN}@huggingface.co/spaces/PriyanshuSenapati/rescuelens" HEAD:main
