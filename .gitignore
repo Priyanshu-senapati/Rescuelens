@@ -30,3 +30,4 @@ training/.quick/
 training/*.log
 training/*.err
 models_*/
+*.log
