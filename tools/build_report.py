@@ -59,6 +59,7 @@ def main() -> None:
     cfg = json.loads((a.train / "config.json").read_text())
     c, e, cal, saf = m["classification"], m["efficiency"], m["calibration"], m["safety"]
     base, detm, roi = d.get("classical_baseline", {}), d["detection"], d.get("classical_roi", {})
+    pre = d.get("detection_pretrained")              # present once the detector has been fine-tuned
     fusion = hybrid_fusion(a.train, a.det, cfg["temperature"])
     hybrid_top1 = max(c["top1"], fusion["top1"]) if fusion else c["top1"]
     hybrid_top5 = fusion["top5"] if fusion and fusion["top1"] >= c["top1"] else c["top5"]
@@ -108,13 +109,15 @@ def main() -> None:
         "",
         "## 2. Object localization (IoU)",
         "| Method | Mean IoU | IoU >= 0.5 |", "|---|---|---|",
-        f"| YOLO11s (deep) | {detm['mean_iou']:.3f} | {pct(detm['iou50_rate'])} |",
+        f"| {detm['model']} | {detm['mean_iou']:.3f} | {pct(detm['iou50_rate'])} |",
+        *([f"| {pre['model']} | {pre['mean_iou']:.3f} | {pct(pre['iou50_rate'])} |"] if pre else []),
         f"| Largest edge contour (classical) | {roi.get('mean_iou', float('nan')):.3f} | {pct(roi.get('iou50_rate'))} |",
         f"(n = {detm['n']} / {roi.get('n')} random test images)",
         "",
         "## 3. Object detection (mAP)",
         "| Metric | Value |", "|---|---|",
         f"| mAP@0.5 | {detm['map50']:.3f} |", f"| mAP@0.5:0.95 | {detm['map50_95']:.3f} |",
+        *([f"| mAP@0.5 / @0.5:0.95 before fine-tuning (COCO-pretrained) | {pre['map50']:.3f} / {pre['map50_95']:.3f} |"] if pre else []),
         "",
         "## 4. Model efficiency",
         "| Model | Size | CPU latency (2 threads) | Top-1 (subset) |", "|---|---|---|---|",

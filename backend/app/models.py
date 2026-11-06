@@ -26,8 +26,16 @@ def softmax(z: np.ndarray) -> np.ndarray:
     return e / e.sum()
 
 
+def vehicle_scores(out: np.ndarray) -> np.ndarray:
+    """Per-anchor vehicle score from a YOLO head (4 + n_classes rows): COCO model -> best of car/bus/truck,
+    our fine-tuned single-class model -> its only class."""
+    n_classes = out.shape[0] - 4
+    rows = [4 + c for c in VEHICLE_CLASSES] if n_classes == 80 else list(range(4, 4 + n_classes))
+    return out[rows].max(0)
+
+
 class Detector:
-    """YOLO11 ONNX export: input 1x3x640x640 RGB/255, output 1x84x8400 (cx, cy, w, h, 80 class scores)."""
+    """YOLO11 ONNX export: input 1x3x640x640 RGB/255, output 1x(4+classes)x8400 (cx, cy, w, h, class scores)."""
 
     def __init__(self, path: Path, size: int = 640, conf: float = 0.25):
         self.session, self.size, self.conf = _session(path), size, conf
@@ -40,8 +48,8 @@ class Detector:
         canvas = np.full((self.size, self.size, 3), 114, np.uint8)
         canvas[pad_y:pad_y + nh, pad_x:pad_x + nw] = cv2.resize(rgb, (nw, nh), interpolation=cv2.INTER_LINEAR)
         x = np.ascontiguousarray(canvas.transpose(2, 0, 1)[None], dtype=np.float32) / 255
-        out = self.session.run(None, {self.session.get_inputs()[0].name: x})[0][0]      # 84 x 8400
-        scores = out[[4 + c for c in VEHICLE_CLASSES]].max(0)
+        out = self.session.run(None, {self.session.get_inputs()[0].name: x})[0][0]      # (4 + classes) x 8400
+        scores = vehicle_scores(out)
         keep = scores > self.conf
         if not keep.any():
             return []
