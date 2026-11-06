@@ -50,6 +50,8 @@ SEED = 42
 VAL_FRAC = 0.1
 DET_N = 120 if QUICK else int(os.environ.get("DET_N", 8041 if torch.cuda.is_available() else 3000))
 ROI_N = 80 if QUICK else 2000
+YOLO_WEIGHTS = os.environ.get("YOLO_WEIGHTS", "yolo11s.pt")   # or models/yolo11s_cars.pt (fine-tuned)
+SKIP_BASELINE = os.environ.get("SKIP_BASELINE") == "1"        # only re-measure the detector, keep the classical results
 IN = Path(os.environ.get("DATA_ROOT", "/kaggle/input"))
 EXPORT = Path(os.environ.get("EXPORT_DIR", "/kaggle/working/export"))
 WORKERS = int(os.environ.get("WORKERS", min(os.cpu_count() or 2, 4 if ON_KAGGLE else 8)))
@@ -82,14 +84,15 @@ def main():
     tr_items, va_items, te_items = split_items(train_items, test_items, VAL_FRAC, SEED, QUICK)
     rng = np.random.RandomState(SEED)
 
-    # ---- deep-learning detector: YOLO11s (COCO-pretrained), vehicle classes car / bus / truck
+    # ---- deep-learning detector: YOLO11s, COCO-pretrained (car / bus / truck) or fine-tuned on Stanford Cars boxes
     from ultralytics import YOLO
-    det = YOLO("yolo11s.pt")
+    det = YOLO(YOLO_WEIGHTS)
+    classes = [2, 5, 7] if len(det.names) == 80 else None
     det_idx = rng.choice(len(te_items), min(DET_N, len(te_items)), replace=False)
     device = 0 if torch.cuda.is_available() else "cpu"
     preds, ious, t0 = [], [], time.time()        # preds: (image id, confidence, box)
     for k, i in enumerate(det_idx):
-        r = det.predict(str(te_items[i][0]), classes=[2, 5, 7], conf=0.05, imgsz=640, device=device, verbose=False)[0]
+        r = det.predict(str(te_items[i][0]), classes=classes, conf=0.05, imgsz=640, device=device, verbose=False)[0]
         boxes, confs = r.boxes.xyxy.cpu().numpy(), r.boxes.conf.cpu().numpy()
         for b, c in zip(boxes, confs):
             preds.append((k, float(c), tuple(b)))
@@ -114,13 +117,22 @@ def main():
         return float(np.sum((mrec[j + 1] - mrec[j]) * mpre[j + 1]))
 
     aps = {t: average_precision(t) for t in np.round(np.arange(0.5, 0.96, 0.05), 2)}
-    M = {"detection": {"model": "yolo11s (COCO pretrained, car/bus/truck)", "n": len(det_idx),
+    metrics_path = EXPORT / "det_metrics.json"
+    M = json.loads(metrics_path.read_text()) if metrics_path.exists() else {}
+    if classes is None and "detection" in M and "COCO" in M["detection"].get("model", ""):
+        M["detection_pretrained"] = M["detection"]          # keep the before/after for the ablation table
+    kind = "COCO pretrained, car/bus/truck" if classes else "fine-tuned on Stanford Cars train boxes"
+    M["detection"] = {"model": f"yolo11s ({kind})", "n": len(det_idx),
                        "mean_iou": float(np.mean(ious)), "iou50_rate": float(np.mean(np.array(ious) >= 0.5)),
                        "map50": aps[0.5], "map50_95": float(np.mean(list(aps.values()))),
-                       "ms_per_image": det_ms, "device": str(device)}}
+                       "ms_per_image": det_ms, "device": str(device)}
     print(json.dumps(M["detection"], indent=1), flush=True)
     exported = det.export(format="onnx", imgsz=640, opset=12, simplify=True, dynamic=False)
     shutil.copy(exported, EXPORT / "yolo11s.onnx")
+    if SKIP_BASELINE:
+        metrics_path.write_text(json.dumps(M, indent=1))
+        print("DONE (detector only)", flush=True)
+        return
 
     # ---- classical localisation for comparison
     roi_idx = rng.choice(len(te_items), min(ROI_N, len(te_items)), replace=False)

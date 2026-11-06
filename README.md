@@ -2,6 +2,8 @@
 
 Uncertainty-aware vehicle identification for crash response (Computer Vision Hackathon 2026, P5).
 
+**Live app: https://priyanshu-senapati--rescuelens-web.us-east.modal.run** (phone or laptop; deployed on Modal from `modal_app.py`)
+
 Photo or live camera -> detect the vehicle -> identify make / model / year (196 Stanford Cars classes) ->
 decide what is safe to conclude: **identified**, **ambiguous** (e.g. hybrid can't be ruled out) or **unknown**.
 Point a phone at a car and the answer locks in once 3 frames agree; a high-voltage warning shows at once, with where the battery

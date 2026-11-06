@@ -31,6 +31,7 @@ training/*.log
 training/*.err
 models_*/
 *.log
+training/.yolo_cars/
 
 # browser tests
 frontend/playwright-report/
