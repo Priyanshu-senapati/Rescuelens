@@ -194,3 +194,68 @@ Rules: never evaluate on the test split while choosing settings (use val); keep 
 | Crop cache for training | `training\.cache\` (git-ignored) |
 | Back-end tests | `cd backend; .venv\Scripts\python -m pytest -q tests` |
 | Local app | `cd backend; $env:MODEL_DIR="..\models"; $env:FRONTEND_DIST="..\frontend\dist"; .venv\Scripts\python -m uvicorn app.main:app --port 8765` |
+
+---
+
+## 7. Team assignments until code freeze (Sat 11:30)
+
+Priyanshu's laptop is busy training, so everyone else works on tasks that need **no GPU and no model files**.
+Workflow for everyone: `git pull`, create a branch (`feat/<name>-<task>`), push it, open a pull request; Priyanshu merges.
+Small doc/JSON edits can be made directly on github.com (pencil icon) as a pull request.
+
+### Priyanshu - models and deployment (laptop)
+- [ ] 22:00 training push (section 3); switch to the best model (section 2.1)
+- [ ] Modal account + `modal setup` + `modal deploy modal_app.py` (section 2.2); share the live URL in the team chat
+- [ ] Decide on the GitHub Release of the model files (section 2.3)
+- [ ] Share `models\classifier_int8.onnx`, `yolo11s.onnx`, `config.json`, `train_emb.npy` with member A (Google Drive) if A does the offline mode
+- [ ] Merge pull requests; final `eval_P5_T50.md` regenerate before 11:30
+
+### Member A (has Claude Code) - product and UI engineering
+The UI runs without the back end: `cd frontend; npm ci; $env:VITE_MOCK="1"; npm run dev` (answers come from `docs/fixtures`).
+1. [ ] **Live camera mode** (high wow factor): a "Point camera" button that opens the rear camera (`getUserMedia`), sends a frame
+       to `/api/analyze` every ~1.5 s while the vehicle is in view, and locks the answer when the same label wins 3 frames in a row.
+2. [ ] **Demo samples**: add one pre-tested "ambiguous" sample and one "unknown car" sample (from `private_photos/unknown`, ask
+       Priyanshu; Wikimedia licence: keep author + licence in `frontend/public/samples/CREDITS.md`).
+3. [ ] **Robustness of the UI**: React error boundary with a "Start again" button; Playwright test: open page -> pick a sample ->
+       result card visible (mock mode); GitHub Action that runs `pytest` (backend) + `npm run build` (frontend) on every push.
+4. [ ] **Report page additions**: high-voltage threshold table (miss rate vs false alarms at 0.05 / 0.1 / 0.2 / 0.3 / 0.5 - the
+       numbers are in `eval_P5_T50.md`, section 6) and the unknown-car result (88.3% of 60 unseen models).
+5. [ ] **Battery-location line in the high-voltage banner** once member B fills `data/hazards.json` (add `battery` and
+       `hv_cables` text fields; show them under the banner message; update `docs/api-contract.md`).
+6. [ ] Stretch, only if 1-5 are done: **offline mode** - run the INT8 classifier in the browser with onnxruntime-web as an
+       installable PWA (rural crash sites often have no signal).
+
+### Member B - safety content and real-world validation (no coding needed)
+1. [ ] **Official emergency response guides** for the 8 hybrid/EV classes without one in `data/hazards.json`
+       (BMW ActiveHybrid 5, Chevrolet Silverado 1500 Hybrid, Tahoe Hybrid, Malibu Hybrid, GMC Yukon Hybrid, Fisker Karma,
+       Nissan Leaf, Tesla Model S - 2012 or nearest year). Only manufacturer / NFPA / Euro NCAP sources. For each, also note
+       **where the HV battery and orange cables are** (e.g. "battery under rear seat, cables along the left sill") -> add as
+       `battery` and `hv_cables` fields. Pull request on github.com.
+2. [ ] **Talk to a real responder** (highest impact for the pitch): message or visit a local fire station / traffic police /
+       ambulance (108) trainer. Ask 3 questions: how do you identify a crashed car today? have you faced an EV/hybrid? would a
+       photo-based check help? Get permission to quote them by role ("Station Officer, Bengaluru Fire Service"). One quote in the
+       pitch beats any feature.
+3. [ ] **Numbers for the problem slide**, each with a source link: road crashes and deaths in India (MoRTH annual report), EV
+       sales growth in India, any reported EV/hybrid rescue incidents. Add to `docs/design.md` section 1 with citations.
+
+### Member C - evidence, docs and demo (no coding needed)
+1. [ ] **Own test photos**: photograph 30+ cars in the college parking (different angles, some at dusk, some partly hidden).
+       These are our honest "judge-style" unseen inputs. Put them in a shared Drive folder (not git); Priyanshu runs
+       `tools/eval_unknown.py` on them for a second, independent unknown-car number.
+2. [ ] **Design doc**: fill section 14 (each member's role); ask the organisers about the design-doc template and the rubric
+       weights; add 3 failure-case screenshots (ambiguous stress test, Thar -> Wrangler, heavy blur) once the live URL exists.
+3. [ ] **Architecture diagram as an image** (draw.io / Excalidraw, same boxes as the mermaid diagram in `docs/design.md`) for the
+       README and any slides; export PNG to `docs/architecture.png`.
+4. [ ] **Demo backup video**: a 3-minute screen recording following the script in section 2.5 (record from the live URL or
+       Priyanshu's laptop on Saturday morning). If the venue Wi-Fi fails, this saves the demo.
+5. [ ] **Viva sheet**: one page per member with the questions from section 2.5 and short answers; everyone rehearses their own part.
+
+### Saturday timeline
+| Time | What |
+|---|---|
+| 09:00 | Everyone pulls `main`; Priyanshu merges pending PRs; live URL check on phones |
+| 10:00 | Freeze features; only fixes after this |
+| 11:00 | Final model numbers -> `eval_P5_T50.md`, README, design doc |
+| 11:30 | **Code freeze** |
+| 12:00-13:00 | Full demo rehearsal x2 with the live URL + viva practice |
+| 13:30 | **Submit** (live URL, GitHub link) |
