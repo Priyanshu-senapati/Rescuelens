@@ -98,14 +98,25 @@ type Decision = Pick<Result, "status" | "headline" | "resolved_level" | "predict
 
 export function decide(probs: Float32Array | number[], unknownScore: number, classes: CarClass[], t: Thresholds): Decision {
   const order = classes.map((_, i) => i).sort((a, b) => probs[b] - probs[a]);
-  const top = classes[order[0]];
-  const pTop = probs[order[0]];
-  let pFamily = 0;
-  let pMake = 0;
+  // brand first (same rule as safety.py): summed make, then the strongest family in it, then its likeliest vehicle
+  const makeP = new Map<string, number>();
+  const familyP = new Map<string, number>();
   classes.forEach((c, i) => {
-    if (c.family === top.family) pFamily += probs[i];
-    if (c.make === top.make) pMake += probs[i];
+    makeP.set(c.make, (makeP.get(c.make) ?? 0) + probs[i]);
+    familyP.set(c.family, (familyP.get(c.family) ?? 0) + probs[i]);
   });
+  let make = classes[0].make;
+  for (const [m, v] of makeP) if (v > makeP.get(make)!) make = m;          // ties: first in class order
+  let family = "";
+  for (const c of classes) if (c.make === make && (family === "" || familyP.get(c.family)! > familyP.get(family)!)) family = c.family;
+  let topI = -1;
+  classes.forEach((c, i) => { if (c.family === family && (topI < 0 || probs[i] > probs[topI])) topI = i; });
+  const top = classes[topI];
+  const pTop = probs[topI];
+  const pMake = makeP.get(make)!;
+  const pFamily = familyP.get(family)!;
+  const single = classes[order[0]];
+  const pSingle = probs[order[0]];
   const isOod = unknownScore > t.unknown;
   const unknown = isOod || pMake < t.make;
 
@@ -115,20 +126,20 @@ export function decide(probs: Float32Array | number[], unknownScore: number, cla
   if (unknown) {
     status = "unknown";
     level = "none";
-    headline = isOod ? "Unknown vehicle - not one of the 196 supported models" : "Cannot identify this vehicle with enough confidence";
+    headline = isOod ? "Not recognised - damaged, unusual or not one of the 196 supported models" : "Cannot identify this vehicle with enough confidence";
   } else if (pTop >= t.identify) {
     status = "identified";
     level = "vehicle";
     headline = top.label;
   } else if (pFamily >= t.family) {
-    const years = [...new Set(order.slice(0, 5).filter((i) => classes[i].family === top.family && probs[i] >= 0.05).map((i) => classes[i].year))].sort((a, b) => a - b);
+    const years = [...new Set(order.slice(0, 5).filter((i) => classes[i].family === family && probs[i] >= 0.05).map((i) => classes[i].year))].sort((a, b) => a - b);
     status = "ambiguous";
     level = "family";
-    headline = `${top.family} family (${years.join(" or ")}) - exact variant uncertain`;
+    headline = `${family} family (${years.join(" or ")}) - exact variant uncertain`;
   } else {
     status = "ambiguous";
     level = "make";
-    headline = `${top.make} - model uncertain`;
+    headline = `${make} - model uncertain`;
   }
 
   const safety = safetyFor(probs, classes, unknown, t);
@@ -136,8 +147,11 @@ export function decide(probs: Float32Array | number[], unknownScore: number, cla
 
   const second = classes[order[1]];
   const reasons: string[] = [];
-  if (second.family === top.family && probs[order[1]] >= 0.15) reasons.push("Top two answers are a known look-alike pair");
-  if (isOod) reasons.push("Looks unlike every car in the training set");
+  if (second.family === single.family && probs[order[1]] >= 0.15) reasons.push("Top two answers are a known look-alike pair");
+  const pct = (v: number) => `${Math.round(v * 100)}%`;
+  if (single.make !== make) reasons.push(`The single top guess (${single.label}, ${pct(pSingle)}) is not a ${make}: the ${make} models together add up to ${pct(pMake)}`);
+  if (status !== "identified" && pSingle < 0.3) reasons.push(`No single model stands out (top answer only ${pct(pSingle)})`);
+  if (isOod) reasons.push("Looks unlike the training photos: damage, an unusual angle, or a model outside the 196");
 
   const top5: Candidate[] = order.slice(0, 5).map((i) => {
     const c = classes[i];
@@ -148,8 +162,8 @@ export function decide(probs: Float32Array | number[], unknownScore: number, cla
     status, headline, resolved_level: level,
     prediction: { label: top.label, make: top.make, model: top.model, year: top.year, body: top.body, confidence: round4(pTop) },
     hierarchy: [
-      { level: "make", name: top.make, prob: round4(pMake) },
-      { level: "family", name: top.family, prob: round4(pFamily) },
+      { level: "make", name: make, prob: round4(pMake) },
+      { level: "family", name: family, prob: round4(pFamily) },
       { level: "vehicle", name: top.label, prob: round4(pTop) },
     ],
     top5, safety,
