@@ -82,6 +82,12 @@ The evaluation numbers for the dashboard (same numbers as `eval_P5_<TeamID>.md`)
 }
 ```
 
+## `GET /offline/{file}`
+
+Only when the server runs with `OFFLINE_MODELS=1`, because it makes the weights public. Serves `config.json`, `classifier_int8.onnx`,
+`train_emb.npy` and `yolo11s.onnx` from the model folder for on-device mode; anything else is a 404. An answer made on the device has the
+same shape with `offline: true`, `quality`, `features` and `comparison` as `null`, and `steps` empty.
+
 ## `GET /api/health`
 
 `{"status": "ok", "model_loaded": true, "version": "..."}`

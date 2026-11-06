@@ -169,7 +169,7 @@ export default function App() {
             </div>
             {result && result.status !== "no_vehicle" && (
               <div className="mt-10 space-y-10">
-                <Pipeline steps={result.steps} />
+                {result.steps.length > 0 && <Pipeline steps={result.steps} />}
                 <StressTest photo={photo} baseline={result} />
                 {result.comparison && <Compare comparison={result.comparison} />}
               </div>

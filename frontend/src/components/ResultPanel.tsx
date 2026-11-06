@@ -54,6 +54,12 @@ export default function ResultPanel({ result: r }: { result: Result }) {
         </p>
       )}
 
+      {r.offline && (
+        <p className="rounded-md border border-dashed border-ink/40 px-3 py-2 text-sm text-ink-soft">
+          Answered on this device, without signal. Check it against the server when you're back online.
+        </p>
+      )}
+
       <div className="rounded-lg border border-line bg-sheet p-5">
         <p className={`inline-block rounded-sm px-2.5 py-1 font-semibold text-white ${st.chip}`}>{st.title}</p>
         <p className="mt-2 font-display text-4xl font-bold leading-[1.05]">{r.headline}</p>

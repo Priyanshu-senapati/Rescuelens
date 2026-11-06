@@ -94,3 +94,15 @@ python tools/check_samples.py
 
 If a sample doesn't give its expected answer, swap the photo instead of changing the label. Also check the live camera on a
 real phone, on the live https URL: browsers only open the camera on https or localhost.
+
+## 6. Decide on offline mode (team decision)
+
+Offline mode is built but **off**, because switching it on makes the model weights publicly downloadable from the live URL (the same
+question as the GitHub Release in `docs/BUILD_PLAN.md` section 2.3). To try it, add `"OFFLINE_MODELS": "1"` to the `.env({...})` call in
+`modal_app.py` and redeploy, then:
+
+1. On a real phone, on Wi-Fi, tap **Make available offline**.
+2. Turn on airplane mode, reopen the app and scan a sample.
+3. Time it. If it's too slow or the phone runs out of memory, leave offline mode out of the demo and describe it as work in progress.
+
+It has only been tested with stand-in models. Don't quote accuracy for it until `eval`-style numbers exist for the browser path.

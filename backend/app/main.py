@@ -11,7 +11,7 @@ from pathlib import Path
 
 import numpy as np
 from fastapi import FastAPI, File, Request, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps, UnidentifiedImageError
 
@@ -28,6 +28,7 @@ MODEL_DIR = Path(os.environ.get("MODEL_DIR", ROOT / "models"))
 FRONTEND_DIST = Path(os.environ.get("FRONTEND_DIST", ROOT / "frontend" / "dist"))
 FIXTURES = ROOT / "docs" / "fixtures"
 MAX_BYTES = 10 * 2**20
+OFFLINE_FILES = {"config.json", "classifier_int8.onnx", "train_emb.npy", "yolo11s.onnx"}
 MAX_SIDE = 1600                              # bigger photos are shrunk first: faster, same accuracy
 Image.MAX_IMAGE_PIXELS = 60_000_000          # refuse decompression bombs
 log = logging.getLogger("rescuelens")
@@ -98,6 +99,14 @@ def create_app() -> FastAPI:
         if not path.exists():
             raise ApiError(404, "not_ready", "Evaluation metrics are not available yet.")
         return json.loads(path.read_text(encoding="utf-8"))
+
+    @app.api_route("/offline/{name}", methods=["GET", "HEAD"])
+    def offline_file(name: str) -> FileResponse:
+        path = MODEL_DIR / name
+        # opt-in, because this makes the model weights publicly downloadable; whitelist: only what on-device mode needs
+        if os.environ.get("OFFLINE_MODELS") != "1" or name not in OFFLINE_FILES or not path.exists():
+            raise ApiError(404, "not_ready", "Offline files are not available on this server.")
+        return FileResponse(path)
 
     if FRONTEND_DIST.is_dir() and (FRONTEND_DIST / "index.html").exists():
         app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="ui")

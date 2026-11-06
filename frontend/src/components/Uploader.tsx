@@ -1,5 +1,6 @@
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { MAX_BYTES } from "../image";
+import OfflineCard from "./OfflineCard";
 
 interface Props {
   onPick: (file: Blob, name: string) => void;
@@ -105,6 +106,7 @@ export default function Uploader({ onPick, onLive }: Props) {
             {error}
           </p>
         )}
+        <OfflineCard />
       </div>
 
       <div className="lg:col-span-2">

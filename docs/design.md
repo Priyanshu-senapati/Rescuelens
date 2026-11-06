@@ -154,6 +154,18 @@ runs the same app on any Docker host. GitHub Actions runs the back-end tests, ty
 Inputs are validated (type, 10 MB limit, decompression-bomb guard, EXIF rotation, HEIC); errors return a JSON
 error code shown by the UI; without model files the app serves fixture responses instead of crashing.
 
+### Offline mode (on-device)
+
+Crash sites often have no signal, so a user can opt in to storing the models on the phone (`frontend/src/offline/`). The app is then an
+installable PWA, and when the network fails or is too slow it runs the detector, classifier, unknown check and safety rules in the browser
+with ONNX Runtime Web (WebAssembly). The same answer shape comes back, marked as answered on the device.
+
+* **Same safety rules:** the TypeScript port and `safety.py` are both tested against `docs/fixtures/safety_golden.json`.
+* **What's different:** no CLAHE detector retry, no classical pipeline or comparison, and a canvas resize instead of PIL.
+* **Not yet measured:** the eval numbers are for the server. The browser path has only been tested with stand-in models, so accuracy,
+  speed and memory on a real phone with the real 54 MB classifier are unknown. Analysis also blocks the page while it runs.
+* **Off by default:** the host must set `OFFLINE_MODELS=1`, because it makes the weights publicly downloadable.
+
 ## 11. Limitations
 
 * Trained on 2012-and-older US-market cars; anything newer is flagged unknown rather than identified.

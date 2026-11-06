@@ -230,7 +230,8 @@ export default function LiveCamera({ onClose, onUsePhoto, onAccept }: Props) {
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Live camera scan" className="fixed inset-0 z-50 overflow-hidden bg-[#0d141b] text-paper">
-      <video ref={video} muted playsInline className="absolute inset-0 h-full w-full object-cover" />
+      <video ref={video} muted playsInline autoPlay aria-hidden="true" className="absolute inset-0 h-full w-full object-cover"
+        onResize={(e) => setFrameSize({ w: e.currentTarget.videoWidth || 16, h: e.currentTarget.videoHeight || 9 })} />
       {locked && <img ref={frozen} src={locked.url} alt="The frame the answer locked on" onLoad={onFrozenLoad} className="absolute inset-0 h-full w-full object-cover" />}
       <canvas ref={edges} aria-hidden="true" className={`absolute inset-0 h-full w-full object-cover ${locked ? "opacity-100" : "opacity-90"}`} />
 

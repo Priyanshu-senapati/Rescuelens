@@ -70,6 +70,7 @@ export interface Result {
   timing_ms: { detect: number; classify: number; classical: number; total: number };
   disclaimer: string;
   mock?: boolean;
+  offline?: boolean;
 }
 
 export interface Metrics {

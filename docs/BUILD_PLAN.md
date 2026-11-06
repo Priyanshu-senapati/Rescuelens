@@ -224,7 +224,7 @@ The UI runs without the back end: `cd frontend; npm ci; $env:VITE_MOCK="1"; npm 
        numbers are in `eval_P5_T50.md`, section 6) and the unknown-car result (now 96.7% with ConvNeXt-Small; ConvNeXt-Tiny's 88.3% is shown for comparison).
 5. [x] **Battery-location line in the high-voltage banner** once member B fills `data/hazards.json` (add `battery` and
        `hv_cables` text fields; show them under the banner message; update `docs/api-contract.md`).
-6. [ ] Stretch, only if 1-5 are done: **offline mode** - run the INT8 classifier in the browser with onnxruntime-web as an
+6. [x] Stretch (built, off until the team decides, see `docs/field-kit.md` section 6): **offline mode** - run the INT8 classifier in the browser with onnxruntime-web as an
        installable PWA (rural crash sites often have no signal).
 
 ### Member B - safety content and real-world validation (no coding needed)

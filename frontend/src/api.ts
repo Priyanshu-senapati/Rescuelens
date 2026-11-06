@@ -1,3 +1,4 @@
+import { offlineReady } from "./offline/store";
 import type { Metrics, Result } from "./types";
 
 const MOCK = import.meta.env.VITE_MOCK === "1";
@@ -6,6 +7,16 @@ const TIMEOUT_MS = 25_000;
 export class ApiError extends Error {
   constructor(public code: string, message: string) {
     super(message);
+  }
+}
+
+async function answerOnDevice(photo: Blob): Promise<Result> {
+  try {
+    const { analyzeLocally } = await import("./offline/engine"); // only loaded when needed: onnxruntime is large
+    return await analyzeLocally(photo);
+  } catch (err) {
+    console.error("On-device analysis failed", err);
+    throw new ApiError("offline", "This device couldn't analyse the photo offline. Identify the vehicle by VIN, plate and badges.");
   }
 }
 
@@ -23,6 +34,7 @@ async function mockResult(name: string): Promise<Result> {
 
 export async function analyze(photo: Blob, name: string, signal?: AbortSignal): Promise<Result> {
   if (MOCK) return mockResult(name);
+  if (!navigator.onLine && (await offlineReady())) return answerOnDevice(photo);
   const body = new FormData();
   body.append("file", photo, name);
   // one controller + timer instead of AbortSignal.any/timeout, which older iPhones (iOS < 17.4) lack
@@ -44,7 +56,10 @@ export async function analyze(photo: Blob, name: string, signal?: AbortSignal): 
     try {
       res = await fetch("/api/analyze", { method: "POST", body, signal: ctrl.signal });
     } catch {
-      throw stopped() ?? new ApiError("network", "Couldn't reach the server. Check your connection and try again.");
+      const stop = stopped();
+      if (stop instanceof DOMException) throw stop;
+      if (await offlineReady()) return answerOnDevice(photo); // signal dropped or too slow: don't leave the responder waiting
+      throw stop ?? new ApiError("network", "Couldn't reach the server. Check your connection and try again.");
     }
     const data: unknown = await res.json().catch(() => null);
     const stop = stopped();
