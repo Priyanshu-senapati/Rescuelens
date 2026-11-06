@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
+import { vehicleRows, vehicleScore } from "../src/offline/detection";
 import { decide, parseLabel, type Hazard } from "../src/offline/safety";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -23,6 +24,18 @@ function close(actual: unknown, expected: unknown, path: string) {
   }
   expect(actual, path).toBe(expected);
 }
+
+test("offline detector scores match the back end for both detector heads", () => {
+  const coco = new Array(84 * 3).fill(0);
+  coco[4 * 3 + 0] = 0.9; // person: must be ignored
+  coco[(4 + 2) * 3 + 1] = 0.8; // car
+  coco[(4 + 7) * 3 + 2] = 0.7; // truck
+  const rows = vehicleRows(84);
+  expect([0, 1, 2].map((i) => vehicleScore(coco, 3, i, rows))).toEqual([0, 0.8, 0.7]);
+
+  const tuned = [0, 0, 0, 0, 0, 0, 0, 0, 0.3, 0.95]; // 5 rows x 2 anchors
+  expect([0, 1].map((i) => vehicleScore(tuned, 2, i, vehicleRows(5)))).toEqual([0.3, 0.95]);
+});
 
 for (const c of golden.cases) {
   test(`on-device safety matches the server: ${c.name}`, () => {

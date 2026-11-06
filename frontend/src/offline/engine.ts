@@ -6,13 +6,13 @@ import wasmUrl from "../../node_modules/onnxruntime-web/dist/ort-wasm-simd-threa
 import mjsUrl from "../../node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs?url";
 import hazardFile from "../../../data/hazards.json";
 import type { Result } from "../types";
+import { vehicleRows, vehicleScore } from "./detection";
 import { DISCLAIMER, decide, parseLabel, type CarClass, type Hazard, type Thresholds } from "./safety";
 import { modelFile } from "./store";
 
 const DET_SIZE = 640;
 const DET_CONF = 0.25;
 const NMS_IOU = 0.45;
-const VEHICLE_CLASSES = [2, 5, 7]; // COCO car, bus, truck
 const MAX_SIDE = 1600;
 
 type Box = [number, number, number, number];
@@ -115,12 +115,12 @@ async function detect(eng: Engine, photo: HTMLCanvasElement): Promise<Detection[
   }
   const res = await eng.detector.run({ [eng.detector.inputNames[0]]: new ort.Tensor("float32", x, [1, 3, DET_SIZE, DET_SIZE]) });
   const out = res[eng.detector.outputNames[0]];
-  const data = out.data as Float32Array; // 1 x 84 x N: cx, cy, w, h, 80 class scores
+  const data = out.data as Float32Array; // 1 x (4 + classes) x N: cx, cy, w, h, class scores
+  const rows = vehicleRows(out.dims[1]);
   const count = out.dims[2];
   const found: Detection[] = [];
   for (let i = 0; i < count; i++) {
-    let score = 0;
-    for (const v of VEHICLE_CLASSES) score = Math.max(score, data[(4 + v) * count + i]);
+    const score = vehicleScore(data, count, i, rows);
     if (score <= DET_CONF) continue;
     const cx = (data[i] - padX) / s;
     const cy = (data[count + i] - padY) / s;
