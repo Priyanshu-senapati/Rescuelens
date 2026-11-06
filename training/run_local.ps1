@@ -4,7 +4,7 @@
 param([string]$Script = "train_classifier.py", [string]$Quick = "0", [string]$EvalOnly = "0")
 $root = Split-Path $PSScriptRoot -Parent
 $env:DATA_ROOT = Join-Path (Split-Path $root -Parent) "data"
-$env:EXPORT_DIR = "models"
+if (-not $env:EXPORT_DIR) { $env:EXPORT_DIR = "models" }   # override to keep a second run separate
 $env:CACHE_DIR = "training/.cache"
 $env:QUICK = $Quick
 $env:EVAL_ONLY = $EvalOnly

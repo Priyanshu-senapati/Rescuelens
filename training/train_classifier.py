@@ -39,7 +39,7 @@ sys.path.insert(0, str(Path.cwd() if ON_KAGGLE else Path(__file__).resolve().par
 from rl_data import CONDITIONS, DS, RandomDark, cache_items, load_stanford_cars, split_items
 
 QUICK = os.environ.get("QUICK", "1") != "0"
-MODEL_NAME = "convnext_tiny.fb_in22k_ft_in1k_384"
+MODEL_NAME = os.environ.get("MODEL_NAME", "convnext_tiny.fb_in22k_ft_in1k_384")
 IMG = 384
 EPOCHS = 1 if QUICK else int(os.environ.get("EPOCHS", 25))
 BATCH = 32
