@@ -1,0 +1,55 @@
+{
+  "request_id": "demo-ambiguous",
+  "status": "ambiguous",
+  "headline": "Hyundai Sonata family (2012) - hybrid cannot be ruled out",
+  "image": {"width": 1280, "height": 853},
+  "detection": {"box": [142, 210, 1105, 760], "score": 0.94},
+  "other_boxes": [],
+  "prediction": {"label": "Hyundai Sonata Hybrid Sedan 2012", "make": "Hyundai", "model": "Sonata Hybrid Sedan", "year": 2012, "body": "Sedan", "confidence": 0.48},
+  "hierarchy": [
+    {"level": "make", "name": "Hyundai", "prob": 0.97},
+    {"level": "family", "name": "Hyundai Sonata", "prob": 0.91},
+    {"level": "vehicle", "name": "Hyundai Sonata Hybrid Sedan 2012", "prob": 0.48}
+  ],
+  "resolved_level": "family",
+  "top5": [
+    {"label": "Hyundai Sonata Hybrid Sedan 2012", "make": "Hyundai", "model": "Sonata Hybrid Sedan", "year": 2012, "prob": 0.48, "powertrain": "hybrid"},
+    {"label": "Hyundai Sonata Sedan 2012", "make": "Hyundai", "model": "Sonata Sedan", "year": 2012, "prob": 0.43, "powertrain": "combustion"},
+    {"label": "Hyundai Azera Sedan 2012", "make": "Hyundai", "model": "Azera Sedan", "year": 2012, "prob": 0.03, "powertrain": "combustion"},
+    {"label": "Hyundai Elantra Sedan 2007", "make": "Hyundai", "model": "Elantra Sedan", "year": 2007, "prob": 0.02, "powertrain": "combustion"},
+    {"label": "Hyundai Genesis Sedan 2012", "make": "Hyundai", "model": "Genesis Sedan", "year": 2012, "prob": 0.01, "powertrain": "combustion"}
+  ],
+  "safety": {
+    "hv_probability": 0.49,
+    "hv_warning": true,
+    "level": "danger",
+    "message": "Hybrid possible (49%). Treat as HIGH VOLTAGE until verified.",
+    "actions": [
+      "Do not cut orange high-voltage cables",
+      "Immobilise the vehicle and switch off the ignition",
+      "Look for HYBRID badges before cutting",
+      "Confirm the vehicle with VIN or plate"
+    ],
+    "guide": {"title": "Hyundai Sonata Hybrid - Emergency Response Guide", "url": "https://boronextrication.com/wp-content/uploads/2010/11/LF-SONATA-HEV-Emergency-Response-Guide.pdf"}
+  },
+  "unknown": {"score": 0.31, "threshold": 0.55, "is_unknown": false},
+  "quality": {"brightness": 22, "contrast": 35, "sharpness": 61, "resolution_px": 550, "cut_off": false, "issues": ["Low light"]},
+  "reliability": {"score": 0.41, "reasons": ["Low light", "Top two answers are a known look-alike pair"]},
+  "steps": [
+    {"key": "original", "title": "Original", "caption": "Uploaded photo", "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="},
+    {"key": "enhanced", "title": "Contrast boost", "caption": "CLAHE on the lightness channel", "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="},
+    {"key": "edges", "title": "Edges", "caption": "Canny edges", "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="},
+    {"key": "contours", "title": "Contours", "caption": "Body outline", "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="},
+    {"key": "roi", "title": "Vehicle region", "caption": "Crop sent to the classifier", "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="},
+    {"key": "wheels", "title": "Wheels", "caption": "Hough circles -> wheelbase", "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="},
+    {"key": "colour", "title": "Colour", "caption": "Dominant colours", "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="}
+  ],
+  "features": {"dominant_colours": [{"hex": "#c9ccd1", "name": "silver", "share": 0.52}, {"hex": "#1d1f22", "name": "black", "share": 0.31}], "aspect_ratio": 1.75, "wheel_count": 2, "wheelbase_ratio": 0.58},
+  "comparison": {
+    "classical": {"label": "Hyundai Sonata Sedan 2012", "prob": 0.09},
+    "deep": {"label": "Hyundai Sonata Hybrid Sedan 2012", "prob": 0.51},
+    "hybrid": {"label": "Hyundai Sonata Hybrid Sedan 2012", "prob": 0.48, "status": "ambiguous"}
+  },
+  "timing_ms": {"detect": 140, "classify": 420, "classical": 95, "total": 690},
+  "disclaimer": "Decision-support prototype. Vehicle identification is probabilistic. Never rely on it alone for cutting, lifting or disabling a vehicle."
+}

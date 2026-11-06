@@ -1,0 +1,42 @@
+{
+  "request_id": "demo-identified",
+  "status": "identified",
+  "headline": "BMW M3 Coupe 2012",
+  "image": {"width": 1024, "height": 683},
+  "detection": {"box": [60, 120, 980, 610], "score": 0.97},
+  "other_boxes": [],
+  "prediction": {"label": "BMW M3 Coupe 2012", "make": "BMW", "model": "M3 Coupe", "year": 2012, "body": "Coupe", "confidence": 0.94},
+  "hierarchy": [
+    {"level": "make", "name": "BMW", "prob": 0.99},
+    {"level": "family", "name": "BMW M3", "prob": 0.95},
+    {"level": "vehicle", "name": "BMW M3 Coupe 2012", "prob": 0.94}
+  ],
+  "resolved_level": "vehicle",
+  "top5": [
+    {"label": "BMW M3 Coupe 2012", "make": "BMW", "model": "M3 Coupe", "year": 2012, "prob": 0.94, "powertrain": "combustion"},
+    {"label": "BMW 3 Series Sedan 2012", "make": "BMW", "model": "3 Series Sedan", "year": 2012, "prob": 0.02, "powertrain": "combustion"},
+    {"label": "BMW 1 Series Coupe 2012", "make": "BMW", "model": "1 Series Coupe", "year": 2012, "prob": 0.01, "powertrain": "combustion"},
+    {"label": "BMW M6 Convertible 2010", "make": "BMW", "model": "M6 Convertible", "year": 2010, "prob": 0.01, "powertrain": "combustion"},
+    {"label": "BMW Z4 Convertible 2012", "make": "BMW", "model": "Z4 Convertible", "year": 2012, "prob": 0.005, "powertrain": "combustion"}
+  ],
+  "safety": {
+    "hv_probability": 0.01,
+    "hv_warning": false,
+    "level": "info",
+    "message": "No high-voltage system expected for this vehicle.",
+    "actions": ["Standard airbag and pretensioner precautions apply", "Confirm the vehicle with VIN or plate"],
+    "guide": null
+  },
+  "unknown": {"score": 0.18, "threshold": 0.55, "is_unknown": false},
+  "quality": {"brightness": 64, "contrast": 58, "sharpness": 80, "resolution_px": 490, "cut_off": false, "issues": []},
+  "reliability": {"score": 0.93, "reasons": []},
+  "steps": [],
+  "features": {"dominant_colours": [{"hex": "#1f3a8a", "name": "blue", "share": 0.61}], "aspect_ratio": 1.88, "wheel_count": 2, "wheelbase_ratio": 0.6},
+  "comparison": {
+    "classical": {"label": "BMW 3 Series Sedan 2012", "prob": 0.12},
+    "deep": {"label": "BMW M3 Coupe 2012", "prob": 0.93},
+    "hybrid": {"label": "BMW M3 Coupe 2012", "prob": 0.94, "status": "identified"}
+  },
+  "timing_ms": {"detect": 130, "classify": 400, "classical": 90, "total": 650},
+  "disclaimer": "Decision-support prototype. Vehicle identification is probabilistic. Never rely on it alone for cutting, lifting or disabling a vehicle."
+}

@@ -1,0 +1,46 @@
+{
+  "request_id": "demo-unknown",
+  "status": "unknown",
+  "headline": "Unknown vehicle - not one of the 196 supported models",
+  "image": {"width": 1200, "height": 800},
+  "detection": {"box": [90, 180, 1150, 760], "score": 0.92},
+  "other_boxes": [],
+  "prediction": {"label": "Toyota Camry Sedan 2012", "make": "Toyota", "model": "Camry Sedan", "year": 2012, "body": "Sedan", "confidence": 0.21},
+  "hierarchy": [
+    {"level": "make", "name": "Toyota", "prob": 0.34},
+    {"level": "family", "name": "Toyota Camry", "prob": 0.21},
+    {"level": "vehicle", "name": "Toyota Camry Sedan 2012", "prob": 0.21}
+  ],
+  "resolved_level": "none",
+  "top5": [
+    {"label": "Toyota Camry Sedan 2012", "make": "Toyota", "model": "Camry Sedan", "year": 2012, "prob": 0.21, "powertrain": "combustion"},
+    {"label": "Hyundai Sonata Sedan 2012", "make": "Hyundai", "model": "Sonata Sedan", "year": 2012, "prob": 0.18, "powertrain": "combustion"},
+    {"label": "Honda Accord Sedan 2012", "make": "Honda", "model": "Accord Sedan", "year": 2012, "prob": 0.11, "powertrain": "combustion"},
+    {"label": "Nissan Juke Hatchback 2012", "make": "Nissan", "model": "Juke Hatchback", "year": 2012, "prob": 0.07, "powertrain": "combustion"},
+    {"label": "Suzuki SX4 Sedan 2012", "make": "Suzuki", "model": "SX4 Sedan", "year": 2012, "prob": 0.05, "powertrain": "combustion"}
+  ],
+  "safety": {
+    "hv_probability": null,
+    "hv_warning": true,
+    "level": "caution",
+    "message": "Vehicle not recognised. Powertrain unknown - treat as possibly high-voltage.",
+    "actions": [
+      "Do not use this prediction for rescue decisions",
+      "Identify the vehicle manually (VIN, plate, badges)",
+      "Check for HYBRID / EV badges and orange cables"
+    ],
+    "guide": null
+  },
+  "unknown": {"score": 0.78, "threshold": 0.55, "is_unknown": true},
+  "quality": {"brightness": 70, "contrast": 55, "sharpness": 74, "resolution_px": 580, "cut_off": false, "issues": []},
+  "reliability": {"score": 0.08, "reasons": ["Looks unlike every car in the training set"]},
+  "steps": [],
+  "features": {"dominant_colours": [{"hex": "#b91c1c", "name": "red", "share": 0.57}], "aspect_ratio": 1.6, "wheel_count": 2, "wheelbase_ratio": 0.57},
+  "comparison": {
+    "classical": {"label": "Honda Accord Sedan 2012", "prob": 0.04},
+    "deep": {"label": "Toyota Camry Sedan 2012", "prob": 0.88},
+    "hybrid": {"label": "Toyota Camry Sedan 2012", "prob": 0.21, "status": "unknown"}
+  },
+  "timing_ms": {"detect": 150, "classify": 410, "classical": 100, "total": 700},
+  "disclaimer": "Decision-support prototype. Vehicle identification is probabilistic. Never rely on it alone for cutting, lifting or disabling a vehicle."
+}

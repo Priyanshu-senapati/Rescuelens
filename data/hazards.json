@@ -1,0 +1,14 @@
+{
+  "_note": "High-voltage classes in Stanford Cars (verified against the 196 class names). guide = official emergency response guide URL; null until someone finds the official one.",
+  "high_voltage": {
+    "BMW ActiveHybrid 5 Sedan 2012": {"powertrain": "hybrid", "guide": null},
+    "Chevrolet Silverado 1500 Hybrid Crew Cab 2012": {"powertrain": "hybrid", "guide": null},
+    "Chevrolet Tahoe Hybrid SUV 2012": {"powertrain": "hybrid", "guide": null},
+    "Chevrolet Malibu Hybrid Sedan 2010": {"powertrain": "hybrid", "guide": null},
+    "GMC Yukon Hybrid SUV 2012": {"powertrain": "hybrid", "guide": null},
+    "Hyundai Sonata Hybrid Sedan 2012": {"powertrain": "hybrid", "guide": "https://boronextrication.com/wp-content/uploads/2010/11/LF-SONATA-HEV-Emergency-Response-Guide.pdf"},
+    "Fisker Karma Sedan 2012": {"powertrain": "hybrid", "guide": null},
+    "Nissan Leaf Hatchback 2012": {"powertrain": "ev", "guide": null},
+    "Tesla Model S Sedan 2012": {"powertrain": "ev", "guide": null}
+  }
+}
