@@ -7,7 +7,8 @@
 # 3. Download the `export/` folder from the Output tab: `yolo11s.onnx`, `baseline.npz`, `baseline_probs.npz`, `det_metrics.json`.
 
 # %%
-QUICK = True
+import os
+QUICK = os.environ.get("QUICK", "1") != "0"   # QUICK=1 (default): smoke test. QUICK=0: full run
 SEED = 42
 VAL_FRAC = 0.1
 DET_N = 3000          # test images for detector metrics on CPU (all 8041 if a GPU is on)

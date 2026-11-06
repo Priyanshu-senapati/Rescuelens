@@ -11,7 +11,8 @@
 # 5. When it's done: version page -> **Output** -> download the `export/` folder.
 
 # %%
-QUICK = True                     # True = smoke test on a few hundred images, 1 epoch
+import os
+QUICK = os.environ.get("QUICK", "1") != "0"   # QUICK=1 (default): smoke test, few hundred images, 1 epoch. QUICK=0: full run
 MODEL_NAME = "convnext_tiny.fb_in22k_ft_in1k_384"
 IMG = 384
 EPOCHS = 25
