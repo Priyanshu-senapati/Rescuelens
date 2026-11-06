@@ -9,6 +9,8 @@
 | How does the lock work? | One frame every 1.5 s, one request at a time. 3 agreeing frames in a row lock it. For an unknown car the closest match is ignored; for an ambiguous one only the level it is sure of counts. |
 | How is live mode kept safe? | The high-voltage state is part of what must agree, so a flickering warning can never lock as safe. A warning shows on the first frame that raises it and stays for 3 frames. |
 | Is the edge overlay real? | Yes. Sobel plus non-maximum suppression (the core of Canny) runs in the browser about 12 times a second, brightest inside the detector box. It is visual feedback; the answer comes from the server. |
+| What is the automatic sweep? | It re-renders the photo at 8 rising levels of one condition, sends each to the real model and plots usable confidence, marking the first level where the answer changes. Real calls, nothing precomputed. |
+| Is the rescue sheet accurate? | It marks the region the manufacturer's guide describes on a generic body shape. Not to scale, and the app says it isn't a guide for where to cut. |
 | What if something breaks? | An error boundary shows "Start again" plus safe advice. Blocked camera and lost server each have their own message. Browser tests cover these and run on every push. |
 
 **Your failure case:** Mahindra Thar answered as Jeep Wrangler: it is styled on the Wrangler, so the unknown check can miss close look-alikes.
@@ -18,7 +20,7 @@
 | Question | Short answer |
 |---|---|
 | Why ConvNeXt at 384 px? | Fine-grained classes differ in small details, so resolution matters. ConvNeXt-Small (ImageNet-22k pretrained) beat Tiny on validation, 94.23% to 93.74%. Test: 94.55% top-1, and 96.7% of unknown cars caught against Tiny's 88.3%. |
-| Why YOLO pretrained, not fine-tuned? | Stanford photos hold one vehicle, so COCO YOLO11s already finds it: mean IoU 0.886, mAP@0.5 0.892. We have no labelled crash data to tune on. Fine-tuning on Stanford boxes is listed as future work. |
+| Why fine-tune YOLO? | COCO weights already found the single car (mean IoU 0.886) but boxes were loose. Fine-tuned on the Stanford **train** boxes as one class: IoU 0.954, mAP@0.5 0.999, mAP@0.5:0.95 0.941. No crash data exists to tune on, so that gap remains. |
 | What did CLAHE do? | Before the classifier it did not help (within +/-0.15 points on dark photos), because training already darkens images. So it is off there. It still retries the detector and drives the pipeline view. We kept that as a measured result. |
 | Temperature scaling and ECE? | Divide logits by T = 0.768, fitted on validation, so "80% sure" means about 80% right. ECE fell from 0.098 to 0.011. Accuracy doesn't change, but thresholds become meaningful. |
 | The summed-probability rule? | Add up the probability of all 9 hybrid/EV classes and warn at 0.05 or above. It misses 1.15% with 0.69% false alarms, against 4.32% missed if we trust the top answer. A miss is far worse than a false alarm. |

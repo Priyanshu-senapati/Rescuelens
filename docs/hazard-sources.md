@@ -16,6 +16,8 @@ from memory. The app shows these lines to someone deciding where to cut, so:
 | Hyundai Sonata Hybrid 2012 | [LF Sonata HEV Emergency Response Guide](https://boronextrication.com/wp-content/uploads/2010/11/LF-SONATA-HEV-Emergency-Response-Guide.pdf) (Hyundai) | Boron Extrication | p.11 | p.6-7, p.30 |
 | Fisker Karma 2012 | [High Voltage Safety and First Response Info Guide, Nov 2011](https://www.morongovalleyfire.org/files/14cfd88f9/Fisker+Karma+PHEV+2011-2012+ERG.pdf) (Fisker Automotive) | Morongo Valley fire department | p.4 diagram, p.27 | p.4, p.16 |
 
+The rescue-sheet drawing uses `schematic` from the same file. It marks the region the guide describes on a generic body shape, so it is not to scale, and it only draws a cable route the guide states (Sonata, Malibu).
+
 ## Caveats to say out loud in the viva
 
 1. **Seven of the nine links are copies.** Only Tesla and Nissan are served by the manufacturer. The others were published by the

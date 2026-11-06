@@ -86,7 +86,7 @@ heavy blur.
 
 ## 5. Before the demo
 
-All 7 samples were run through the real model on the live URL on 6 Nov 2026, and both new ones answer as intended. If the model changes, for example after the detector fine-tuning, check them again:
+All 8 samples were run through the real model on the live URL on 6 Nov 2026, after the fine-tuned detector shipped, and answer as the README lists. If the model changes, check them again:
 
 ```bash
 python tools/check_samples.py
@@ -94,7 +94,7 @@ python tools/check_samples.py
 
 If a sample doesn't give its expected answer, swap the photo instead of changing the label.
 
-**Redeploy after merging this work.** The live site keeps the old guide data until then, and links a Tesla or Chevrolet to the Hyundai guide because that was the only one on file.
+**Redeploy after merging any UI work.** The live site only shows what was deployed.
 
 Then check the live camera on a real phone on the live https URL. It has only run against the real model with a simulated camera feed.
 

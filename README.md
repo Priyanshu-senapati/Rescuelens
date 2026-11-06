@@ -14,7 +14,7 @@
 
 <img src="docs/img/live-lock.gif" alt="Live camera mode: edges are drawn over the car, corner ticks lock on, and a high-voltage verdict with the battery location rises into view" width="800">
 
-<sub>Real answers from the deployed model, with this repository's guide data. The camera feed is simulated from a sample photo.</sub>
+<sub>Real answers from the deployed model. The camera feed is simulated from a sample photo.</sub>
 
 </div>
 
@@ -30,9 +30,9 @@ RescueLens identifies a vehicle from how it looks, across 196 make, model and ye
 
 ## One model, three honest answers
 
-![Three results from the real model: identified Tesla Model S with a high-voltage warning, a partly hidden Chevrolet where a hybrid cannot be ruled out, and a Tata Nexon answered as not recognised](docs/img/three-answers.png)
+![Three results from the real model: identified Tesla Model S with a high-voltage warning, a Chevrolet Silverado with its rear hidden where a hybrid cannot be ruled out, and a Tata Nexon answered as not recognised](docs/img/three-answers.png)
 
-<sub>Real answers from the deployed model, with this repository's guide data.</sub>
+<sub>Real answers from the deployed model.</sub>
 
 | Answer | When | What the responder is told |
 |---|---|---|
@@ -45,12 +45,15 @@ RescueLens identifies a vehicle from how it looks, across 196 make, model and ye
 - **Live camera that locks.** A frame every 1.5 s, with a live edge drawing and corner ticks on the detected vehicle. Three agreeing frames lock the answer.
 - **Warnings never wait.** A high-voltage warning shows on the first frame that raises it, and a car flickering between "warning" and "no warning" can never lock as safe.
 - **Summed-probability safety rule.** No single hybrid has to win. If all 9 hybrid/EV classes together reach 5%, the warning fires.
-- **Battery and cable locations.** Read from manufacturer guides for all 9 models, with [every source and caveat listed](docs/hazard-sources.md).
+- **A rescue sheet that draws itself.** A technical drawing marks where the battery sits and how the cables run, read from manufacturer guides for all 9 models, with [every source and caveat listed](docs/hazard-sources.md).
 - **Unknown-car detection.** Softmax confidence can stay high on cars it has never seen, so it also measures distance to the training cars.
-- **Stress test.** Drag darkness, smoke, blur or occlusion sliders and watch the answer and the advice change.
+- **Automatic stress sweep.** One button runs your photo through the real model at 8 rising levels of darkness, smoke, blur or occlusion, plots the confidence curve live and says exactly where the answer broke.
+- **It shows its working.** While the model runs, the photo dims into a blueprint of its real edge map. When the answer lands, the drawing snaps onto the detected vehicle.
 - **Three approaches, side by side.** Classical computer vision, deep learning and the hybrid on the same photo, with every classical step visible.
 - **Works without signal (opt-in).** An installable app can run the models on the device, under the same safety rules, pinned to the server by a shared test file.
 - **Fails safely.** A crash shows safe advice and a "Start again" button, never a blank page.
+
+![The automatic stress sweep on the real model: the answer holds as blur rises, then the curve drops and the app says where it changed](docs/img/stress-sweep.png)
 
 ## Try these on the live app
 
@@ -60,8 +63,9 @@ Answers from the real deployed model, 6 Nov 2026.
 |---|---|---|
 | Clear daylight photo | **Identified:** BMW M3 Coupe 2012, 98% | The easy case, with the full pipeline on show |
 | Hybrid that looks like a petrol car | **Identified:** Hyundai Sonata Hybrid 2012, 99%, high voltage | The whole pitch in one photo |
-| Taken at night | **Identified:** Audi S4 Sedan 2012, 92% | Darkness barely hurts accuracy |
-| Partly hidden | **Not certain:** Chevrolet, hybrid can't be ruled out | Uncertainty changes the advice |
+| Taken at night | **Identified:** Audi S4 Sedan 2012, 84% | Darkness barely hurts accuracy |
+| Partly hidden | **Identified:** Chevrolet Tahoe Hybrid 2012, 64%, high voltage | Still finds the hybrid with part of it covered |
+| Hybrid or not? Rear hidden | **Not certain:** Chevrolet Silverado family, hybrid can't be ruled out | Uncertainty changes the advice |
 | Electric car | **Identified:** Tesla Model S 2012, 98%, high voltage | Finds the EV and warns about it |
 | Look-alike trim: S5 or A5? | **Not certain:** Audi, model uncertain | Its most frequent mix-up, and it says so |
 | Indian car outside the 196 models | **Not recognised** | Refuses to guess at a Tata Nexon |

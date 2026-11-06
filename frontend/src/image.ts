@@ -6,6 +6,8 @@ export interface Prepared {
   blob: Blob;
   url: string; // object URL of exactly what was uploaded, so boxes line up
   name: string;
+  width?: number; // known up front, so the page doesn't jump while the image decodes
+  height?: number;
 }
 
 function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
@@ -24,7 +26,7 @@ export async function prepareImage(file: Blob, name: string): Promise<Prepared> 
     canvas.getContext("2d")!.drawImage(bmp, 0, 0, canvas.width, canvas.height);
     bmp.close();
     const blob = await canvasToBlob(canvas);
-    return { blob, url: URL.createObjectURL(blob), name: name.replace(/\.\w+$/, "") + ".jpg" };
+    return { blob, url: URL.createObjectURL(blob), name: name.replace(/\.\w+$/, "") + ".jpg", width: canvas.width, height: canvas.height };
   } catch {
     // browser can't decode it (e.g. HEIC outside Safari): send the original, the server converts it
     return { blob: file, url: URL.createObjectURL(file), name };
