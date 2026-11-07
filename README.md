@@ -222,7 +222,7 @@ Seed 42 everywhere; the validation split is a stratified 10% of the official tra
 | `tools/` | Report builder, unknown-car and crash evaluations, sample checker |
 | `docs/` | Design, API, sources, viva sheets, solution report |
 
-**Docs:** [Solution report](docs/Solution_Report_P5_T50.md) · [Design](docs/design.md) · [API contract](docs/api-contract.md) · [High-voltage sources](docs/hazard-sources.md) · [Viva sheets](docs/viva/) · [Evaluation](eval_P5_T50.md) · [Photo credits](frontend/public/samples/CREDITS.md)
+**Docs:** [Solution report](docs/Solution_Report_P5_T50_Clover.pdf) · [Design](docs/design.md) · [API contract](docs/api-contract.md) · [High-voltage sources](docs/hazard-sources.md) · [Viva sheets](docs/viva/) · [Evaluation](eval_P5_T50.md) · [Photo credits](frontend/public/samples/CREDITS.md)
 
 ## What it can't do
 
