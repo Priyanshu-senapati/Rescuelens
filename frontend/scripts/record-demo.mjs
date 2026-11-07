@@ -1,4 +1,4 @@
-// Records the backup demo video from a running RescueLens, following docs/BUILD_PLAN.md section 2.5.
+// Records the backup demo video from a running RescueLens.
 //   npm run demo:record -- https://your-live-url
 // Saves a captioned .webm in frontend/demo-output/. The camera scene uses a sample photo as a simulated feed, and says so on screen.
 import { copyFileSync, mkdirSync, readdirSync, renameSync } from "node:fs";

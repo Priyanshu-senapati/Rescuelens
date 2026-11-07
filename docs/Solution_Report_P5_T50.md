@@ -24,6 +24,7 @@
 
 | Tool | Used by | Used for |
 | :--- | :--- | :--- |
+| Claude Code (Anthropic) | Priyanshu Kumar Senapati | Classifier training, calibration, safety metrics and deployment |
 | Claude Code (Anthropic) | Saatwik Kumar Yadav | Live camera, rescue-sheet drawing, stress sweep, crash screen, offline mode, browser tests and CI; finding and reading the manufacturer guides and statistics; README, viva sheets and charts; drafting this report |
 
 Most of the text in this report was drafted with Claude Code from our code and evaluation results.
