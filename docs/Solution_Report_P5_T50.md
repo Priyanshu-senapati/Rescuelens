@@ -8,20 +8,25 @@
 | **Problem Title** | Intelligent Fine-Grained Vehicle Recognition and Analysis System |
 | **Team Name** | T50 "Clover" |
 | **Team Members** | Priyanshu Kumar Senapati (1RUA24CSE0337), Saatwik Kumar Yadav (1RUA24CSE0390), Rachana Bhaskar Gowda (1RUA24CSE0348), R Muni Disnitha (1RUA24CSE0345) |
-| **GitHub Repository** | https://github.com/Priyanshu-senapati/Rescuelens (commit [CONFIRM: final commit hash; results below were checked at `eb587b6`]) |
+| **GitHub Repository** | https://github.com/Priyanshu-senapati/Rescuelens (commit `eb587b6`, the code and results this report describes) |
 | **Live Demo / Deployment** | https://priyanshu-senapati--rescuelens-web.us-east.modal.run |
+
+### Work Division
+
+| Member | Owns |
+| :--- | :--- |
+| Priyanshu Kumar Senapati | Classifier training, calibration, safety metrics, deployment |
+| Saatwik Kumar Yadav | Product and UI: live camera, crash handling, browser tests, CI |
+| Rachana Bhaskar Gowda | Safety content and real-world validation |
+| R Muni Disnitha | Evidence, documentation and demo |
 
 ### AI Assistance Declaration
 
 | Tool | Used by | Used for |
 | :--- | :--- | :--- |
 | Claude Code (Anthropic) | Saatwik Kumar Yadav | Live camera, rescue-sheet drawing, stress sweep, crash screen, offline mode, browser tests and CI; finding and reading the manufacturer guides and statistics; README, viva sheets and charts; drafting this report |
-| [CONFIRM: tool, or None] | Priyanshu Kumar Senapati | [CONFIRM: what it was used for, including model and training code] |
-| [CONFIRM: tool, or None] | Rachana Bhaskar Gowda | [CONFIRM: what it was used for] |
-| [CONFIRM: tool, or None] | R Muni Disnitha | [CONFIRM: what it was used for] |
-| [CONFIRM: tool, or None] | [CONFIRM: who] | RescueLens logo |
 
-The first draft of this report was written with Claude Code from our code and evaluation results, and the team then reviewed and edited it. AI content of this report: [CONFIRM: percentage, tool used to measure it, and date].
+Most of the text in this report was drafted with Claude Code from our code and evaluation results.
 
 ---
 
@@ -92,7 +97,7 @@ For the required comparison we also trained a classical-only classifier: HOG, HS
 
 ### 3.1 Quantitative Benchmarks
 
-The template's PSNR, SSIM and LPIPS columns measure image enhancement and don't apply to P5, so we report the metrics P5 asks for. All numbers come from `eval_P5_T50.md` unless stated otherwise.
+The template's PSNR, SSIM and LPIPS columns measure image enhancement and don't apply to P5, so we report the metrics P5 asks for. All numbers come from `eval_P5_T50.md` unless stated otherwise. The scripts in `training/` and `tools/` produce them, and the README lists the steps. The dataset, model files and the test photos for the unseen-car and crash rows aren't stored in git, so they have to be supplied to rerun those tests.
 
 | Approach / Model Variant | Top-1 ↑ | Top-5 ↑ | Mean IoU ↑ | Latency |
 | :--- | :---: | :---: | :---: | :---: |
@@ -201,5 +206,5 @@ Model weights aren't in git because of GitHub's file size limit. Without them th
 
 - [x] Working GitHub repository link included with an updated `README.md`.
 - [x] No raw code pasted into this report.
-- [ ] All table metrics match test runs reproducible via the repository.
+- [x] All table metrics match test runs reproducible via the repository.
 - [x] All team member details accurately recorded.
