@@ -45,8 +45,6 @@ Most of the text in this report was drafted with Claude Code from our code and e
 
 ## 2. Technical Architecture & Implementation
 
-> *Note: Do not paste raw code files in this document. Reference repository modules and explain system design.*
-
 The code is split by job: `backend/app/classical.py` (classical CV), `models.py` (ONNX models), `safety.py` (decision rules), `pipeline.py` (orchestration) and `main.py` (API and input validation). Training lives in `training/` and the React interface in `frontend/`. `docs/design.md` has the full reasoning.
 
 ![System architecture](architecture.png)
