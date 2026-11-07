@@ -8,20 +8,26 @@
 | **Problem Title** | Intelligent Fine-Grained Vehicle Recognition and Analysis System |
 | **Team Name** | T50 "Clover" |
 | **Team Members** | Priyanshu Kumar Senapati (1RUA24CSE0337), Saatwik Kumar Yadav (1RUA24CSE0390), Rachana Bhaskar Gowda (1RUA24CSE0348), R Muni Disnitha (1RUA24CSE0345) |
-| **GitHub Repository** | https://github.com/Priyanshu-senapati/Rescuelens (commit [CONFIRM: final commit hash; results below were checked at `eb587b6`]) |
+| **GitHub Repository** | https://github.com/Priyanshu-senapati/Rescuelens (commit `eb587b6`, the code and results this report describes) |
 | **Live Demo / Deployment** | https://priyanshu-senapati--rescuelens-web.us-east.modal.run |
+
+### Work Division
+
+| Member | Owns |
+| :--- | :--- |
+| Priyanshu Kumar Senapati | Classifier training, calibration, safety metrics, deployment |
+| Saatwik Kumar Yadav | Product and UI: live camera, crash handling, browser tests, CI |
+| Rachana Bhaskar Gowda | Safety content and real-world validation |
+| R Muni Disnitha | Evidence, documentation and demo |
 
 ### AI Assistance Declaration
 
 | Tool | Used by | Used for |
 | :--- | :--- | :--- |
+| Claude Code (Anthropic) | Priyanshu Kumar Senapati | Classifier training, calibration, safety metrics and deployment |
 | Claude Code (Anthropic) | Saatwik Kumar Yadav | Live camera, rescue-sheet drawing, stress sweep, crash screen, offline mode, browser tests and CI; finding and reading the manufacturer guides and statistics; README, viva sheets and charts; drafting this report |
-| [CONFIRM: tool, or None] | Priyanshu Kumar Senapati | [CONFIRM: what it was used for, including model and training code] |
-| [CONFIRM: tool, or None] | Rachana Bhaskar Gowda | [CONFIRM: what it was used for] |
-| [CONFIRM: tool, or None] | R Muni Disnitha | [CONFIRM: what it was used for] |
-| [CONFIRM: tool, or None] | [CONFIRM: who] | RescueLens logo |
 
-The first draft of this report was written with Claude Code from our code and evaluation results, and the team then reviewed and edited it. AI content of this report: [CONFIRM: percentage, tool used to measure it, and date].
+Most of the text in this report was drafted with Claude Code from our code and evaluation results.
 
 ---
 
@@ -29,9 +35,9 @@ The first draft of this report was written with Claude Code from our code and ev
 
 * **Core Technical Challenge:** Stanford Cars asks for one label out of 196, and many of those labels are nearly the same car. An Audi S5 and an Audi A5 differ mainly in the grille, bumpers and badges, and that pair was our most frequent test error (15 photos). A Hyundai Sonata and a Sonata Hybrid share a body. Real photos then add darkness, smoke, blur, low resolution, occlusion and awkward angles.
 
-  We applied the problem to crash response, where a wrong answer has a cost. Rescuers need to know the model before cutting, because hybrids and EVs carry high-voltage batteries and cables that can't be seen from outside, and at a crash the plate or VIN may be crushed or hidden. That gave us two failure modes to design against: missing a hybrid, and confidently naming a car the model has never seen, which is likely because the dataset stops at 2012 and covers US-market cars. Our constraints were a public web app usable from a phone, an answer well inside the 10 seconds the rubric allows, and a CPU-only host with 2 cores and 2 GB of memory.
+  We built this for crash response, where a wrong answer has a real cost. Rescuers need to know the model before cutting, because hybrids and EVs carry high-voltage batteries and cables that can't be seen from outside, and at a crash the plate or VIN may be crushed or hidden. So we had two failures to design against: missing a hybrid, and confidently naming a car the model has never seen, which is likely because the dataset stops at 2012 and covers US-market cars. Our constraints were a public web app usable from a phone, an answer well inside the 10 seconds the rubric allows, and a CPU-only host with 2 cores and 2 GB of memory.
 
-* **Proposed Methodology:** A fine-tuned YOLO11s finds the vehicle, classical computer vision measures whether the photo can be trusted, and a ConvNeXt-Small classifies the crop. A safety layer then turns calibrated probabilities into one of three answers (identified, not certain, not recognised) and warns about high voltage whenever the 9 hybrid and EV classes together reach 5%. We chose this over static baselines because classical features alone reached 13.72% top-1, the network on the whole photo reached 91.66%, and trusting only the top answer missed 4.32% of hybrids and EVs against 1.15% with the summed rule.
+* **Proposed Methodology:** A fine-tuned YOLO11s finds the vehicle, classical computer vision measures whether the photo can be trusted, and a ConvNeXt-Small classifies the crop. A safety layer then turns calibrated probabilities into one of three answers (identified, not certain, not recognised) and warns about high voltage whenever the 9 hybrid and EV classes together reach 5%. We went with this instead of a static baseline because classical features alone reached 13.72% top-1, the network on the whole photo reached 91.66%, and trusting only the top answer missed 4.32% of hybrids and EVs against 1.15% with the summed rule.
 
 ![Top-1 accuracy of the three approaches](img/chart-approaches.png)
 
@@ -75,9 +81,9 @@ For the required comparison we also trained a classical-only classifier: HOG, HS
 
 ### 2.3 Hybrid Integration & Adaptive Mechanism
 
-* **Fusion Strategy:** Classical and deep methods meet at several points. Detection decides the crop the classifier sees. CLAHE rescues detection in dark scenes and supplies a second reading on dark crops, averaged with the first. Quality measurements explain low confidence to the user. We also tried late fusion of classical and deep probabilities, and the best weight on validation came out as 0, so the classical model added nothing the network lacked and we left it out of classification. The brand expert is fused with the whole-car brand totals by a product rule (whole^0.8 x close-ups^0.2), chosen on validation. A user can also add up to 3 photos of one vehicle: their probabilities are multiplied, and photos that confidently name different brands are never merged.
+* **Fusion Strategy:** The classical and deep parts connect in a few places. Detection decides the crop the classifier sees. CLAHE gives detection a second try in dark scenes and gives the classifier a second reading on dark crops, averaged with the first. Quality measurements explain low confidence to the user. We also tried late fusion of classical and deep probabilities, and the best weight on validation came out as 0, so the classical model wasn't adding anything the network didn't already have, and we left it out of classification. The brand expert is fused with the whole-car brand totals by a product rule (whole^0.8 x close-ups^0.2), chosen on validation. A user can also add up to 3 photos of one vehicle: their probabilities are multiplied, and photos that confidently name different brands are never merged.
 
-* **Decision Logic:** The template's example balances amplification against noise. In our problem the same question is how much to conclude from uncertain evidence:
+* **Decision Logic:** The template's example is about balancing amplification against noise. For us the equivalent question is how much to conclude from uncertain evidence:
 
     1. The brand with the most summed probability wins, then the strongest family inside it, then the likeliest model, so a lone top guess can't overrule the combined evidence for another brand.
     2. The answer stops at the deepest level it is sure of: a model at 0.6 or above, then a family at 0.6 or above, and otherwise the brand alone.
@@ -92,7 +98,7 @@ For the required comparison we also trained a classical-only classifier: HOG, HS
 
 ### 3.1 Quantitative Benchmarks
 
-The template's PSNR, SSIM and LPIPS columns measure image enhancement and don't apply to P5, so we report the metrics P5 asks for. All numbers come from `eval_P5_T50.md` unless stated otherwise.
+The template's PSNR, SSIM and LPIPS columns measure image enhancement and don't apply to P5, so we report the metrics P5 asks for. All numbers come from `eval_P5_T50.md` unless stated otherwise. The scripts in `training/` and `tools/` produce them, and the README lists the steps. The dataset, model files and the test photos for the unseen-car and crash rows aren't stored in git, so they have to be supplied to rerun those tests.
 
 | Approach / Model Variant | Top-1 ↑ | Top-5 ↑ | Mean IoU ↑ | Latency |
 | :--- | :---: | :---: | :---: | :---: |
@@ -116,14 +122,14 @@ The template's PSNR, SSIM and LPIPS columns measure image enhancement and don't 
 
 ![Accuracy when answering only the most confident photos](img/chart-coverage.png)
 
-* **Analysis:** The crop gave the largest accuracy gain, and quantization gave the largest speed gain at no measured accuracy cost on our 300-image check. Darkness and haze barely hurt because training already darkens images, while blur and low resolution remove the fine detail this task depends on. The summed rule trades a small rise in false alarms for far fewer missed hybrids. With all the models running, a full answer on the live site takes about 1 to 2 s, well inside the 10-second limit.
+* **Analysis:** The crop helped accuracy the most. Quantization helped speed the most, and we measured no accuracy loss from it on our 300-image check. Darkness and haze barely hurt because training already darkens images, while blur and low resolution remove the fine detail this task depends on. The summed rule trades a small rise in false alarms for far fewer missed hybrids. With all the models running, a full answer on the live site takes about 1 to 2 s, well inside the 10-second limit.
 
   The 94.55% figure was measured on crops from the dataset's annotated boxes, with the classifier alone. It doesn't include errors from our detector, or the brand expert and night reading, which we tested separately. With 99.85% of detector boxes at IoU 0.5 or above we'd expect the full pipeline to be close, but we haven't measured that number. The robustness and high-voltage figures have the same limit.
 
 ### 3.2 Visual Outputs & Intermediate Representations
 
 1. **Extreme low-light:** In the top row of the figure below, step 1 is a dark photo and step 2 is the CLAHE-enhanced version. The live model still identifies this car as an Audi S4 Sedan 2012 at about 91%.
-2. **Non-uniform / backlit scenes:** We didn't test backlit scenes as a separate condition. CLAHE works on local tiles, which limits overexposure of bright regions. Our closest evidence is partial occlusion: in the stress sweep below, a BMW holds "Identified" up to 75% on the occlusion slider, then turns to "Not recognised" with the warning on.
+2. **Non-uniform / backlit scenes:** We didn't test backlit scenes as a separate condition. CLAHE works on local tiles, which limits overexposure of bright regions. The closest thing we have is partial occlusion: in the stress sweep below, a BMW holds "Identified" up to 75% on the occlusion slider, then turns to "Not recognised" with the warning on.
 3. **Intermediate states:** Every classical step is returned as an image and shown in the app: original with box, contrast boost, edges, contours, vehicle region, wheels and colour.
 
 ![Classical pipeline stages on a dark photo and a daylight photo](img/pipeline-steps.png)
@@ -145,7 +151,7 @@ The three answers from the real model: a Tesla Model S identified with its batte
 | FP32 instead of INT8 (300 images) | 93.67% vs 93.67% | Quantization lost nothing on this subset |
 | CLAHE before the classifier, severe darkness | 93.75% to 93.90% | Very little, because training already darkens images |
 
-Beyond top-1, fine-tuning the detector raised mean IoU from 0.886 to 0.954, and the brand expert raised brand accuracy from 98.30% to 98.61% on clean photos and from 90.75% to 92.05% with 30% hidden. The night reading was neutral to +0.5 points on artificially darkened photos.
+Some gains don't show up in top-1. Fine-tuning the detector raised mean IoU from 0.886 to 0.954, and the brand expert raised brand accuracy from 98.30% to 98.61% on clean photos and from 90.75% to 92.05% with 30% hidden. The night reading was neutral to +0.5 points on artificially darkened photos.
 
 ---
 
@@ -201,5 +207,5 @@ Model weights aren't in git because of GitHub's file size limit. Without them th
 
 - [x] Working GitHub repository link included with an updated `README.md`.
 - [x] No raw code pasted into this report.
-- [ ] All table metrics match test runs reproducible via the repository.
+- [x] All table metrics match test runs reproducible via the repository.
 - [x] All team member details accurately recorded.

@@ -220,9 +220,9 @@ Seed 42 everywhere; the validation split is a stratified 10% of the official tra
 | `frontend/` | React UI: live camera, results, stress test, Model report, offline mode |
 | `data/` | Class names, hybrid/EV guides and locations, measured safety numbers |
 | `tools/` | Report builder, unknown-car and crash evaluations, sample checker |
-| `docs/` | Design, API, sources, viva sheets, field kit |
+| `docs/` | Design, API, sources, viva sheets, solution report |
 
-**Docs:** [Solution report](docs/Solution_Report_P5_T50.md) · [Design](docs/design.md) · [API contract](docs/api-contract.md) · [High-voltage sources](docs/hazard-sources.md) · [Build plan](docs/BUILD_PLAN.md) · [Field kit](docs/field-kit.md) · [Viva sheets](docs/viva/) · [Evaluation](eval_P5_T50.md) · [Photo credits](frontend/public/samples/CREDITS.md)
+**Docs:** [Solution report](docs/Solution_Report_P5_T50.md) · [Design](docs/design.md) · [API contract](docs/api-contract.md) · [High-voltage sources](docs/hazard-sources.md) · [Viva sheets](docs/viva/) · [Evaluation](eval_P5_T50.md) · [Photo credits](frontend/public/samples/CREDITS.md)
 
 ## What it can't do
 
@@ -239,3 +239,7 @@ Seed 42 everywhere; the validation split is a stratified 10% of the official tra
 ## Team T50 "Clover"
 
 Priyanshu Kumar Senapati · Saatwik Kumar Yadav · Rachana Bhaskar Gowda · R Muni Disnitha
+
+## License
+
+The code is under the [MIT License](LICENSE). The sample photos keep their own licences, listed in [CREDITS.md](frontend/public/samples/CREDITS.md). The Stanford Cars dataset and the pretrained weights have their own terms, which MIT doesn't change.
